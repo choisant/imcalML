@@ -41,7 +41,7 @@ Now we need to create our virtual environment which should use python 3.6. We wi
 conda create -n imcal python=3.6 notebook
 conda activate imcal
 ```
-Our next step is to install the packages we need. Most of them come as required packages with the lumin package, which is the base of the project. When we use `pip install` inside of our environment, the packages are only installed in that environment and will not affect any other projects.
+Our next step is to install the packages we need. Most of them come as required packages with the [lumin](https://github.com/GilesStrong/lumin) package, which is the base of the project. When we use `pip install` inside of our environment, the packages are only installed in that environment and will not affect any other projects.
 
 ```
 pip install lumin
@@ -73,7 +73,7 @@ Notice the number *8889*. This is the port that the notebook is hosted on. We wa
 ```
 ssh -L 1234:localhost:8889 -y <username>@atlas<X>.ift.uib.no
 ```
-Rembember to change out username and X with your own username and the server number. Type your password and press enter. Now you should be able to open your browser and paste in the second link from above, changing out the port number to the one you areusing on your local machine.
+Rembember to change out username and X with your own username and the server number. Type your password and press enter. Now you should be able to open your browser and paste in the second link from above, changing out the port number to the one you are using on your local machine.
 
 ```
 http://localhost:1234/?token=a18268c5f164e0dbe2e52aec3b0429ee20264ee6828a2802
