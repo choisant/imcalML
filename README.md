@@ -35,11 +35,12 @@ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
-Now we need to create our virtual environment which should use python 3.6. We will call the environment imcal. We include the jupyter notebook package as well. Always remember to activate the environment at the start of a work session, and deactivate it afterwards.
+## Virtual environments
+Now we need to create our virtual environments. For the notebooks which utilise lumin we should use python 3.6 and some specific package versions. We will call the environment lumin. We include the jupyter notebook package as well. Always remember to activate the environment at the start of a work session, and deactivate it afterwards.
 
 ```
-conda create -n imcal python=3.6 notebook
-conda activate imcal
+conda create -n lumin python=3.6 notebook
+conda activate lumin
 ```
 Our next step is to install the packages we need. Most of them come as required packages with the [lumin](https://github.com/GilesStrong/lumin) package, which is the base of the project. When we use `pip install` inside of our environment, the packages are only installed in that environment and will not affect any other projects.
 
@@ -47,6 +48,27 @@ Our next step is to install the packages we need. Most of them come as required 
 pip install lumin
 ```
 Make sure everything goes as it should. You can install additional packages as required, but note that you can break lumin if you upgrade any of its dependencies.
+
+The next virtual environment we need is a fully updated python 3.9 venv. We will cal this venv imcal.
+
+```
+conda create -n imcal python=3.9 notebook
+conda activate imcal
+```
+
+In this venv we can install any widely used packages we wish, as these should not conflict. Some of the packages used here are:
+* numpy
+* pandas
+* matplotlib
+* scikit
+* seaborn
+* fast-histograms
+* pytorch
+* torchvision
+* pickle
+* tqdm
+* uproot
+* awkward
 
 ## Open the notebooks
 
