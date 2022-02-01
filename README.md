@@ -79,3 +79,7 @@ Rembember to change out username and X with your own username and the server num
 http://localhost:1234/?token=a18268c5f164e0dbe2e52aec3b0429ee20264ee6828a2802
 ```
 If you did everything correctly you now have access to all the notebooks in your browser and can start working!
+
+## Visual Studio Code (advanced users)
+
+You can also connect to the jupyter notebook kernel on a remote server using the Remote-SSH Plugin in VSC. See this [tutorial](https://www.digitalocean.com/community/tutorials/how-to-use-visual-studio-code-for-remote-development-via-the-remote-ssh-plugin). This is definitely the way to go if you want to make an extensive project with several scripts as well as notebooks.
