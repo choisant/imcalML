@@ -36,7 +36,7 @@ bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
 ## Virtual environments
-Now we need to create our virtual environments. For the notebooks which utilise lumin we should use python 3.6 and some specific package versions. We will call the environment lumin. We include the jupyter notebook package as well. Always remember to activate the environment at the start of a work session, and deactivate it afterwards.
+Now we need to create our virtual environments. For the notebooks which utilise lumin we should use python 3.6 and some specific package versions. We will call the environment lumin. We include the jupyter notebook package as well. Always remember to activate the environment at the start of a work session, and deactivate it afterwards. If you are not using lumin you can skip making this venv and go straight to the fully updated python 3.9 venv.
 
 ```
 conda create -n lumin python=3.6 notebook
