@@ -3,6 +3,7 @@ from fast_histogram import histogram2d
 import numpy as np
 import uproot
 import h5py
+import matplotlib.pyplot as plt
 
 def apply_filters(key_list, image):
     for key in key_list:
@@ -29,7 +30,7 @@ def create_histograms(x, y, z, max_events, res):
     if max_available_events < max_events:
         max_events = max_available_events
     Cal = [histogram2d(x[i], y[i], 
-            range=[[-np.pi, np.pi], [-2.5, 2.5]], bins=res, 
+            range=[[-np.pi, np.pi], [-5, 5]], bins=res, 
             weights=z[i]) 
             for i in range(0, max_events)]
     return Cal
@@ -60,27 +61,16 @@ def store_hists_hdf5(images, savepath, filename, meta):
         labels       labels array, (MAX_EVENTS, 1) to be stored
     """
     n_events = meta["Events"]
-    filters = meta["Filters"]
-    
-    def make_filter_code(filters):
-        if filters[0] != "":
-            letter_list = [x[0]+"_" for x in filters]
-            code = ""
-            code = code.join(letter_list)
-            code = code[:-1]
-        return str(code)
-    filter_code = make_filter_code(filters)
-    
     #For logging
-    path = (f"{savepath}/{filename}_{n_events}_events_{filter_code}.h5")
+    path = (f"{savepath}/{filename}_{n_events}_events.h5")
 
 
     # Create a new HDF5 file
-    file = h5py.File(f"{savepath}/{filename}_{n_events}_events_{filter_code}.h5", "w")
+    file = h5py.File(f"{savepath}/{filename}_{n_events}_events.h5", "w")
 
     # Create a dataset in the file
     dataset = file.create_dataset(
-        "images", np.shape(images), h5py.h5t.STD_U8BE, data=images
+        "images", np.shape(images), h5py.h5t.IEEE_F32LE, data=images
     )
     for key, value in meta.items():
         meta_set = file.create_dataset(
@@ -89,5 +79,32 @@ def store_hists_hdf5(images, savepath, filename, meta):
     file.close()
     return path
 
-def test():
-    print("Import success")
+def view_data(data, cols, num_classes, spread):
+    
+    def matrix_image_plot(ax, label):
+        ax.set_ylabel(r"$\phi$ [radians]]", fontsize=12)
+        ax.set_xlabel(r"$\eta$", fontsize=12)
+        ax.set_title(label, fontsize=14,weight="bold")
+        ax.tick_params(which="both", direction="inout", top=True, right=True, labelsize=12, pad=5, length=4, width=2)
+        ax.tick_params(which="major", length=8)
+        ax.tick_params(which="minor", length=6)
+        ax.minorticks_on()
+
+    k = [[i]*cols for i in range(num_classes)]
+    print(k)
+    for i in range(len(k)):
+        row = k[i]
+        row = [item*(spread) for item in row]
+        row = [int(item + np.random.randint(1, high = 100)) for item in row]
+        k[i] = row
+    print(k)
+    images = [data.images[item].cpu() for item in k]
+    print("Image shape: ", images[0][0].shape)
+    labels = [data.img_labels[item].cpu() for item in k]
+    labels = [label.tolist() for label in labels]
+
+    fig, axs = plt.subplots(nrows = num_classes, ncols = cols, figsize = (cols*6, num_classes*6))
+    for i in range (len(k)):
+        for j in range(cols):
+            matrix_image_plot(axs[i][j], str(labels[i][j]))
+            axs[i][j].imshow(images[i][j], extent=[-5, 5, -np.pi, np.pi], aspect='auto')

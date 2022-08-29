@@ -4,6 +4,8 @@ from fast_histogram import histogram2d
 from sklearn.preprocessing import normalize
 import argparse
 import logging
+from datetime import datetime
+import sys
 
 from imcal import *
 
@@ -16,13 +18,11 @@ parser.add_argument('-r', '--resolution', type=int, default = 80,
                         help="Resolution of histograms. If not specified, it will be 80. Must be an integer*10.")
 parser.add_argument('-N', type=int, default = -1, 
                         help="Number of histograms to create. If not specified, it will be the same as number of events in rootfile.")
-parser.add_argument('--filters', type=list, default = ["none"], 
-                        help="Filters to apply. See imcal.py for available options.")
 args = parser.parse_args()
 
 #Set up logging
 logging.basicConfig(filename="root_to_2dhists.log", level=logging.INFO)
-logging.info(f"////")
+logging.info(f"//{datetime.now()}//")
 logging.info(f"Reading file {args.file}")
 
 #set global variables
@@ -30,14 +30,15 @@ MAX_EVENTS = args.N #images to make
 savepath = args.savepath
 filename = args.name
 data_paths = [f"{args.file}:Delphes"] #Is in list format because of too lazy to change
-filters = args.filters
 
 #Set resolution
 MIN_RES = 20
 if args.resolution%10==0:
     RESOLUTION = args.resolution
-else: print("Resolution must be dividable ny 10.")
-
+else: 
+    logging.info("Resolution must be dividable ny 10.")
+    logging.critical("Invalid resolution format.")
+    sys.exit(1)
 
 #Load data
 clusters = [load_data(path, MAX_EVENTS, "Tower", 
@@ -68,23 +69,14 @@ hists_Ehad = create_histograms(ak.to_numpy(clusters[0].Phi), ak.to_numpy(cluster
                                 ak.to_numpy(clusters[0].Ehad), MAX_EVENTS, RESOLUTION)
 hists_tracks = create_histograms(ak.to_numpy(tracks[0].Phi), ak.to_numpy(tracks[0].Eta), 
                                     ak.to_numpy(tracks[0].PT), MAX_EVENTS, RESOLUTION)
-#normalise
 
-#hists_Eem = preproc_histograms(hists_Eem)
-#hists_Ehad = preproc_histograms(hists_Ehad)
-#hists_tracks = preproc_histograms(hists_tracks)
-
-print(f"Check max value: {np.max(hists_Eem)}")
-
-#Stack to RGB and apply filters
+#Stack to RGB
 images = np.stack((hists_Eem, hists_Ehad, hists_tracks), axis=-1)
-images = apply_filters(filters, images)
-logging.info(f"Image shape: {images.shape}")
+logging.info(f"Image data shape: {images.shape}")
 
 # Create meta data
 meta = {
     "Resolution": RESOLUTION,
-    "Filters" : filters,
     "Events" : MAX_EVENTS,
     "Input" : data_paths[0]
 }
