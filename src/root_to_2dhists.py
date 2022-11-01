@@ -56,7 +56,7 @@ max_hits = np.max([np.max([len(event) for event in item["Eta"]]) for item in clu
 logging.info(f"Padding towers to size: {max_hits}")
 clusters = [ak.pad_none(item, max_hits, axis=-1) for item in clusters]
 
-#Pad track data and normalise
+#Pad track data and pad none
 max_hits = np.max([np.max([len(event) for event in item["Eta"]]) for item in tracks])
 logging.info(f"Padding tracks to size: {max_hits}")
 tracks = [ak.pad_none(item, max_hits, axis=-1) for item in tracks]

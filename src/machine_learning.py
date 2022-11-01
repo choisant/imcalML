@@ -5,25 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torch.utils.data import Dataset
-from torch import Tensor
 
-class CalorimeterDataset(Dataset):
-    #Creates tuple object used in the dataloader
-    def __init__(self, images, labels, transform=None):
-            self.img_labels = labels
-            self.images = images
-            self.transform = transform
-            
-    def __len__(self):
-        return len(self.img_labels)
-    
-    def __getitem__(self, idx):
-        image = self.images[idx]
-        label = self.img_labels[idx]
-        if self.transform:
-            image = self.transform(image)
-        return image, label
+from torch import Tensor
 
 
 #This code is heavily inspired by/copied from this tutorial; https://pythonprogramming.net/introduction-deep-learning-neural-network-pytorch/

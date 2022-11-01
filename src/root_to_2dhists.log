@@ -94,3 +94,38 @@ INFO:root:Padding towers to size: 405
 INFO:root:Padding tracks to size: 185
 INFO:root:Image data shape: (10000, 120, 120, 3)
 INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/ttbar_10000_events.h5
+INFO:root://2022-10-24 09:37:28.437187//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n5_M10_10000events.root
+INFO:root:Number of events loaded: [10000]
+INFO:root:Padding towers to size: 580
+INFO:root:Padding tracks to size: 441
+INFO:root:Image data shape: (10000, 100, 100, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH_n5_M10_10000_events.h5
+INFO:root://2022-10-24 09:43:44.223271//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL_10000events.root
+INFO:root:Number of events loaded: [1000]
+INFO:root:Padding towers to size: 508
+INFO:root:Padding tracks to size: 318
+INFO:root:Image data shape: (1000, 100, 100, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL_1000_events.h5
+INFO:root://2022-10-24 10:10:03.321415//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL_10000events.root
+INFO:root:Number of events loaded: [10000]
+INFO:root:Padding towers to size: 561
+INFO:root:Padding tracks to size: 363
+INFO:root:Image data shape: (10000, 100, 100, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL_10000_events.h5
+INFO:root://2022-10-24 10:32:37.979079//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n5_M8_10000events.root
+INFO:root:Number of events loaded: [10000]
+INFO:root:Padding towers to size: 546
+INFO:root:Padding tracks to size: 389
+INFO:root:Image data shape: (10000, 100, 100, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH_n5_M8_10000_events.h5
+INFO:root://2022-10-31 15:19:58.783829//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n2_M12_10000events.root
+INFO:root:Number of events loaded: [10000]
+INFO:root:Padding towers to size: 574
+INFO:root:Padding tracks to size: 466
+INFO:root:Image data shape: (10000, 100, 100, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH_n2_M12_10000_events.h5
