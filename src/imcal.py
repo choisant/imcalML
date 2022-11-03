@@ -1,11 +1,29 @@
 # imcal.py
-from fast_histogram import histogram2d
+#scientific libraries and plotting
 import numpy as np
-import uproot
-import h5py
 import matplotlib.pyplot as plt
+import pandas as pd
+
+#other libraries
+from tqdm import tqdm
+import time
+import random
+import os
+import sys
+from pathlib import Path
+import h5py
+import uproot
+from fast_histogram import histogram2d
+
+#torch specific
 import torch
+import torchvision as torchv
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
+from torch import Tensor
 
 """
 Classes specific to our data
@@ -212,11 +230,12 @@ def store_hists_hdf5(images, savepath, filename, meta):
         labels       labels array, (MAX_EVENTS, 1) to be stored
     """
     n_events = meta["Events"]
+    res = meta["Resolution"]
     #For logging
     path = (f"{savepath}/{filename}_{n_events}_events.h5")
 
     # Create a new HDF5 file
-    file = h5py.File(f"{savepath}/{filename}_{n_events}_events.h5", "w")
+    file = h5py.File(f"{savepath}/{filename}_res{res}_{n_events}_events.h5", "w")
 
     # Create a dataset in the file
     dataset = file.create_dataset(

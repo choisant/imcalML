@@ -1,7 +1,6 @@
 import numpy as np
 import awkward as ak
 from fast_histogram import histogram2d
-from sklearn.preprocessing import normalize
 import argparse
 import logging
 from datetime import datetime
