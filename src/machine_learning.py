@@ -23,6 +23,7 @@ def fwd_pass(net, X:Tensor, y:Tensor, res:int, device, optimizer, train=False):
     return acc, loss
 
 def test(net, data, res:int, device, optimizer, size:int = 32):
+    net.eval()
     dataset = DataLoader(data, size, shuffle=True) #shuffle data and choose batch size
     X, y = next(iter(dataset)) #get a random batch
     val_acc, val_loss = fwd_pass(net, X, y, res, device, optimizer, train=False)
@@ -30,10 +31,11 @@ def test(net, data, res:int, device, optimizer, size:int = 32):
     
 def predict(net, data, size:int, res:int, device):
     #Returns the predictions (as class number values)
-    dataset = DataLoader(data, size, shuffle=True) #shuffle data and choose batch size
+    dataset = DataLoader(data, size, shuffle=False) #shuffle data and choose batch size
     prediction = torch.zeros((len(dataset), size))
     truth = torch.zeros((len(dataset), size))
     i = 0
+    net.eval()
     with torch.no_grad():
         for data in tqdm(dataset):
             X, y = data
@@ -41,7 +43,6 @@ def predict(net, data, size:int, res:int, device):
             prediction[i] = torch.argmax(outputs, dim=-1)
             truth[i] = torch.argmax(y, dim=-1)
             i = i+1
-    print(i*size)
     return torch.flatten(truth), torch.flatten(prediction)
 
 def train(net, traindata, testdata, size:int, epochs:int, res:int, device, optimizer):
@@ -50,6 +51,7 @@ def train(net, traindata, testdata, size:int, epochs:int, res:int, device, optim
     df_data = [[0], [0], [0], [0], [0], [0]]
     df = pd.DataFrame(dict(zip(df_labels, df_data)))
     i = 0
+    net.train()
     for epoch in tqdm(range(epochs)):
         for data in dataset:
             i = i+1
