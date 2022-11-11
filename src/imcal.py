@@ -131,10 +131,10 @@ class Hdf5Dataset(Dataset):
 		#data
 		data = group.get('data')[()]
 		# GTX cards are single precision only
-		data = data.astype(np.float32)
+		#data = data.astype(np.float32)
 		data = torch.from_numpy(data)
 		if self.transform:
-			data = self._transform(data)
+			data = self.transform(data)
 
 		return (data.to(self.device), label.to(self.device))
 
@@ -371,7 +371,7 @@ def label_maker(n_classes:int, n_events:int):
 Visualisation
 """
 
-def view_data(data, cols, num_classes:int, labels, res, spread):
+def view_data(data, cols, num_classes:int, labels, res,spread):
     
     def matrix_image_plot(ax, label):
         ax.set_ylabel(r"$\phi$ [radians]]", fontsize=12)
@@ -383,26 +383,26 @@ def view_data(data, cols, num_classes:int, labels, res, spread):
         ax.minorticks_on()
     images = np.zeros((num_classes, cols, res, res, 3))
     labels = [[labels[i]]*cols for i in range(num_classes)]
+    print(labels)
     k = [[i]*cols for i in range(num_classes)]
+    print(k)
     for i in range(len(k)):
         row = k[i]
         row = [item*(spread) for item in row]
         row = [int(item + np.random.randint(1, high = 100)) for item in row]
         k[i] = row
-    print("Images: ", k)
+    print(k)
     for i, row in enumerate(k):
         for j, item in enumerate(row):
-            images[i][j] = data[item][0]#.cpu()
-    #images = [data[item][0].cpu() for item in k]
+            images[i][j] = data[item][0].cpu()
     print("Image shape: ", images[0][0].shape)
-    #labels = [data[item][1].cpu() for item in k]
-    #labels = [label.tolist() for label in labels]
 
     fig, axs = plt.subplots(nrows = num_classes, ncols = cols, figsize = (cols*6, num_classes*6))
     for i in range (len(k)):
         for j in range(cols):
             matrix_image_plot(axs[i][j], str(labels[i][j]))
             axs[i][j].imshow(images[i][j], extent=[-5, 5, -np.pi, np.pi], aspect='auto')
+
 
 
 def cal_image_plot(ax):
