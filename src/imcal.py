@@ -3,6 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sn
 
 #other libraries
 from tqdm import tqdm
@@ -14,6 +15,10 @@ from pathlib import Path
 import h5py
 import uproot
 from fast_histogram import histogram2d
+from random import shuffle as randomshuffle
+from pathlib import Path
+from typing import Optional, Callable, Union
+from sklearn.metrics import confusion_matrix
 
 #torch specific
 import torch
@@ -48,6 +53,100 @@ class CalorimeterDataset(data.Dataset):
         if self.transform:
             image = self.transform(image)
         return image, label
+
+class Hdf5Dataset(Dataset):
+	
+	def __init__(
+		self,
+		path: Union[Path,str],
+		labels: list[str],
+        device: torch.device,
+		shuffle: bool = True,
+		transform: Optional[Callable] = None,
+		event_limit: Optional[int] = None
+
+	):
+		r"""
+		Args:
+			path (Path or str): Path to directory containing HDF5 files, with .h5 suffix 
+			shuffle (bool): Randomize order of events. Always enable for training, 
+				otherwise all batches will contain a single class only. Optionally enable
+				shuffling in DataLoader
+			transform (Callable, optional): Function for data transforms
+			event_limit (int, optional): Limit number of events in dataset 
+		"""
+		super().__init__()
+		
+		self.path = path
+		self.labels = labels
+		self.device = device
+		self.shuffle = shuffle
+		self.transform = transform
+		self.event_limit = event_limit
+
+		# Get file list
+		if not isinstance(path, Path):
+			path = Path(path)
+		
+		filenames = path.glob('*.h5')
+		
+		# Open file descriptors and get event keys
+		# Store file name along with key, to keep track
+		self._files = {}
+		self._event_keys = []
+		for full_file_path in filenames:
+			fd = h5py.File(full_file_path, 'r')
+			filename = full_file_path.name.__str__()
+			self._files[filename] = fd
+			# Limit number of events
+			if event_limit:
+				event_keys = list(fd.keys())[:event_limit]
+			else:
+				event_keys = list(fd.keys())
+			event_keys = [(filename, key) for key in event_keys]
+			self._event_keys += event_keys
+		
+		assert len(self._files) > 0, f'No files found in {path}'
+		
+		# Shuffle keys
+		if (shuffle):
+			randomshuffle(self._event_keys)
+
+
+	def __len__(self):
+		return len(self._event_keys)
+
+	def __getitem__(self, idx):
+		
+		if torch.is_tensor(idx):
+			idx = idx.tolist()
+		
+		filename, key = self._event_keys[idx]
+		group = self._files[filename].get(key)
+
+		#convert label from string to tensor
+		label = group.get('label')[()].decode()
+		label = self.label_maker(label, self.labels)
+		
+		#data
+		data = group.get('data')[()]
+		# GTX cards are single precision only
+		data = data.astype(np.float32)
+		data = torch.from_numpy(data)
+		if self.transform:
+			data = self._transform(data)
+
+		return (data.to(self.device), label.to(self.device))
+
+	def label_maker(self, value, labels):
+		#Creates labels for the classes. The first class gets value [1, 0, .., 0], the next [0, 1, ..., 0] etc
+		#Outputs a tensor
+		for i, label in enumerate(labels):
+			if value in label:
+				idx = i
+		vector = np.zeros(len(labels))
+		vector[idx] = 1
+		return torch.from_numpy(vector)
 
 class HDF5LazyDataset(data.Dataset):
     #https://towardsdatascience.com/hdf5-datasets-for-pytorch-631ff1d750f5
@@ -272,7 +371,7 @@ def label_maker(n_classes:int, n_events:int):
 Visualisation
 """
 
-def view_data(data, cols, num_classes:int, spread, res):
+def view_data(data, cols, num_classes:int, labels, res, spread):
     
     def matrix_image_plot(ax, label):
         ax.set_ylabel(r"$\phi$ [radians]]", fontsize=12)
@@ -283,19 +382,17 @@ def view_data(data, cols, num_classes:int, spread, res):
         ax.tick_params(which="minor", length=6)
         ax.minorticks_on()
     images = np.zeros((num_classes, cols, res, res, 3))
-    labels = [[i]*cols for i in range(num_classes)]
-    print(labels)
+    labels = [[labels[i]]*cols for i in range(num_classes)]
     k = [[i]*cols for i in range(num_classes)]
-    print(k)
     for i in range(len(k)):
         row = k[i]
         row = [item*(spread) for item in row]
         row = [int(item + np.random.randint(1, high = 100)) for item in row]
         k[i] = row
-    print(k)
+    print("Images: ", k)
     for i, row in enumerate(k):
         for j, item in enumerate(row):
-            images[i][j] = data[item][0].cpu()
+            images[i][j] = data[item][0]#.cpu()
     #images = [data[item][0].cpu() for item in k]
     print("Image shape: ", images[0][0].shape)
     #labels = [data[item][1].cpu() for item in k]
@@ -320,6 +417,28 @@ def cal_image_plot(ax):
     ax.tick_params(which="major", length=6)
     ax.minorticks_on()
 
+def plot_conf_matrix(confusion, accuracy, labels):
+    """
+    plot confusion matrix
+    """
+    fig, ax = plt.subplots(figsize = (8, 8))
+
+    #Generate the confusion matrix
+    cf_matrix = confusion_matrix(confusion["Truth"], confusion["Predictions"], normalize="true")
+    cf_matrix = np.round(cf_matrix, 3)
+    ax = sn.heatmap(cf_matrix, annot=True, cbar=False, cmap='rocket', fmt='g',annot_kws={"size": 24})
+
+    #ax.set_title('Confusion matrix\n\n', size=24)
+    ax.set_xlabel('\nPredicted Values', size=24)
+    ax.set_ylabel('Actual Values ', size=24)
+
+    ## Ticket labels - List must be in alphabetical order
+    ax.xaxis.set_ticklabels(labels, size=20)
+    ax.yaxis.set_ticklabels(labels, size=20)
+    ax.set_title(f"Accuracy: {round(accuracy, 2)*100}%", size=26, pad=20)
+
+    ## Display the visualization of the Confusion Matrix.
+    plt.show()
 """
 Histogram creation
 """
@@ -365,32 +484,49 @@ def load_hd5_histogram(path:Path, n_events:int, filters):
         return Tensor(arr)
 
 
-def load_datasets_old(input_files:list, data_path:list, device, n_events:int, val_pct=0.1, filters=None):
-    #Loads the data files
-    val_size = int(n_events*val_pct)
-    train_size = int(n_events*(1-val_pct))
-    data = [load_hd5_histogram(data_path / file, n_events, filters) for file in input_files]
-    #Partitions off training data
-    Cal_train = torch.cat([item[0:train_size] for item in data]).float().to(device)
-    labels_train = label_maker(len(data), train_size).float().to(device)
-    #Testing data
-    Cal_test = torch.cat([item[(train_size):(train_size+val_size)] for item in data]).float().to(device)
-    labels_test = label_maker(len(data), val_size).float().to(device)
-    #Check everything is ok
-    print(f"Data has shape {Cal_test[0].shape}. {len(labels_train)} training images and {len(labels_test)} testing images")
-    print(f"There are {len(data)} classes.")
-    
-    transforms = torch.nn.Sequential(
-        torchv.transforms.RandomVerticalFlip(),
-        #torchv.transforms.RandomHorizontalFlip(),
-        RandomRoll(0)
-    )
+def load_datasets(input_files:list, device, n_events:int, filters=None, transforms=None):
+    """ 
+    Dataset must be in hdf5 format:
+    Event1 /group
+        Data /dataset
+        Label  /dataset #not used for now
+    Event2 /group
+        Data  /dataset
+        Label  /dataset
+    """
+    def load_hd5_histogram(path:Path, n_events:int, filters):
+        with h5py.File(path, 'r') as f:
+            keys = list(f.keys())
+            keys = keys[0:n_events]
+            data = [f[key]["data"] for key in keys]
+            #create array
+            arr = np.array(data)
+            print(f"Loaded data with {len(arr)} entries of shape {np.shape(arr)}")
+            print(f"Check max value: {np.max(arr)}")
+            #Filters (normalise etc)
+            arr = apply_filters(filters, arr, maxvalue=2000)
+            return Tensor(arr)
 
-    train_dataset = CalorimeterDataset(Cal_train, labels_train, transform=transforms)
-    #train_dataset = CalorimeterDataset(Cal_train, labels_train)
-    test_dataset = CalorimeterDataset(Cal_test, labels_test)
+    def label_maker(n_classes:int, n_events:int):
+        #Creates labels for the classes. The first class gets value [1, 0, .., 0], the next [0, 1, ..., 0] etc
+        a = torch.zeros(n_events*n_classes, n_classes, dtype=torch.int)
+        for i in range(n_classes):
+            for j in range(n_events):
+                a[n_events*i + j][i] = 1
+        return a
+    print(f"Loads data with transforms {transforms} and filters {filters}")
+    #Loads the data files
+    data = [load_hd5_histogram(file, n_events, filters) for file in input_files]
+    Cal = torch.cat([item[0:n_events] for item in data]).float().to(device)
+    labels = label_maker(len(data), n_events).float().to(device)
     
-    return train_dataset, test_dataset
+    #Check everything is ok
+    print(f"Data has shape {Cal[0].shape}")
+    print(f"There are {len(data)} classes.")
+
+    dataset = CalorimeterDataset(Cal, labels, transform=transforms)
+    
+    return dataset
 
 
 """
