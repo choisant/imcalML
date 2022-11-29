@@ -593,3 +593,24 @@ INFO:root:Padding towers to size: 516
 INFO:root:Padding tracks to size: 359
 INFO:root:Image data shape: (3000, 50, 50, 3)
 INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/sph/50/PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL_test_3000_events.h5
+INFO:root://2022-11-16 15:12:15.280490//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n5_M8_10000events.root
+INFO:root:Number of events loaded: [10000]
+INFO:root:Padding towers to size: 546
+INFO:root:Padding tracks to size: 389
+INFO:root:Image data shape: (10000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n5_M8__10000_events.h5
+INFO:root://2022-11-16 15:15:10.231925//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL_10000events.root
+INFO:root:Number of events loaded: [10000]
+INFO:root:Padding towers to size: 561
+INFO:root:Padding tracks to size: 363
+INFO:root:Image data shape: (10000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/sph/50/PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL_10000_events.h5
+INFO:root://2022-11-22 13:12:17.483028//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n5_M8_10000events.root
+INFO:root:Number of events loaded: [10000]
+INFO:root:Padding towers to size: 546
+INFO:root:Padding tracks to size: 389
+INFO:root:Image data shape: (10000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n5_M8_10000_events.h5

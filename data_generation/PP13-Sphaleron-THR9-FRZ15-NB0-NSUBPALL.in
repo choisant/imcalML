@@ -1,0 +1,159 @@
+
+# -*- ThePEG-repository -*-
+
+##################################################
+# Example generator based on LHC parameters
+# usage: Herwig read LHC.in
+##################################################
+
+read snippets/PPCollider.in
+
+##################################################
+# Technical parameters for this run
+##################################################
+
+cd /Herwig/EventHandlers 
+#set EventHandler:CascadeHandler        NULL 
+#set EventHandler:HadronizationHandler  NULL 
+#set EventHandler:DecayHandler          NULL 
+# The handler for multiple parton interactions 
+#set /Herwig/Shower/ShowerHandler:MPIHandler       NULL
+set EventHandler:Weighted No
+
+cd /Herwig/Generators
+set EventGenerator:NumberOfEvents 10000000
+set EventGenerator:RandomNumberGenerator:Seed 31122001 
+#set EventGenerator:RandomNumberGenerator:Seed 12345678
+set EventGenerator:PrintEvent 1000
+set EventGenerator:DebugLevel 1
+set EventGenerator:MaxErrors 10000
+
+cd /Herwig/Samplers
+
+##################
+# NEW SAMPLER
+##################
+create Herwig::BlobSampler BlobSampler
+set BlobSampler:UpdateAfter 1000
+set /Herwig/EventHandlers/EventHandler:Sampler BlobSampler
+create Herwig::BinBlobSampler FlatBinBlobSampler
+set /Herwig/Samplers/FlatBinBlobSampler:NIterations 1
+set /Herwig/Samplers/FlatBinBlobSampler:InitialPoints 100000
+set /Herwig/Samplers/BlobSampler:BinBlobSampler /Herwig/Samplers/FlatBinBlobSampler
+set /Herwig/Samplers/BlobSampler:Verbose Yes
+set /Herwig/Samplers/BlobSampler:AlmostUnweighted No
+#set /Herwig/Samplers/BlobSampler:BinBlobSampler:Kappa 0.01
+
+cd /Herwig/Generators
+########################
+## sqrt(s)	      ##
+########################
+set /Herwig/Generators/EventGenerator:EventHandler:LuminosityFunction:Energy 13000
+set EventGenerator:EventHandler:MaxLoop 10000000
+
+cd /Herwig/Cuts
+set JetKtCut:MinKT 20.0*GeV
+set /Herwig/Cuts/Cuts:MHatMin 9000*GeV
+set /Herwig/Cuts/Cuts:MHatMax 50000*GeV
+
+cd /Herwig/Analysis
+set Basics:CheckQuark false # removes warning that there are quarks in the final state in case hadronization is turned off
+set /Herwig/Analysis/Basics:RelativeMomentumTolerance 1E-5
+
+##################################################
+# Matrix Elements for hadron-hadron collisions 
+# (by default only gamma/Z switched on)
+##################################################
+
+# The MAMBO phase space
+cd /Herwig/MatrixElements/Matchbox/Phasespace
+create Herwig::MamboPhasespace MamboPS
+set MamboPS:CouplingData PhasespaceCouplings
+
+cd /Herwig/MatrixElements/
+create Herwig::MESphaleron MESphaleron Sphalerons.so
+
+insert SubProcess:MatrixElements[0] MESphaleron
+# Choose the phase space generator
+set MESphaleron:Phasespace /Herwig/MatrixElements/Matchbox/Phasespace/MamboPS
+#set MESphaleron:Phasespace /Herwig/MatrixElements/Matchbox/Phasespace/InvertiblePhasespace
+
+set MESphaleron:NAdditionalMin 0
+set MESphaleron:NAdditional 0
+
+# fix the number of Higgses to be even
+set MESphaleron:EvenNHiggs Yes
+# binomial dist-n for the W vs Z gauge bosons 
+set MESphaleron:BinomialGaugeBosons Yes
+set MESphaleron:ProbWvsZ 0.6666666666666
+# binomial dist-n for Z vs gamma 
+set MESphaleron:BinomialNeutralGaugeBosons Yes
+# binomial distribution for Higgses-other gauge bosons
+set MESphaleron:BinomialHiggses No
+# probability of obtaining a Higgs versus other gauge bosons
+set MESphaleron:ProbH 0.0625
+
+set MESphaleron:NPhotonMax 20
+set MESphaleron:NZMax 0
+set MESphaleron:NHiggsMax 0
+
+set MESphaleron:NPhotonMin 0
+set MESphaleron:NZMin 0
+set MESphaleron:NHiggsMin 0
+
+# set the sphaleron scale
+set MESphaleron:SphaleronScale 9000*GeV
+set MESphaleron:SphaleronScaleMax 50000.*GeV
+
+set MESphaleron:ProcessType Sphaleron
+
+# set the pre-factor in front of the ME
+set MESphaleron:Prefactor 1E20.
+
+# use all sub-processes or sample a few of them? (NRandom, All)
+set MESphaleron:SubSampling All
+set MESphaleron:NRandom 50
+
+# how to generate the sub-processes
+set MESphaleron:ProcessGeneration HardCoded
+#set MESphaleron:ProcessGeneration OnTheFly
+
+# how to set the boson multiplicity weights
+#set MESphaleron:NumBosonParam Flat
+set MESphaleron:NumBosonParam Gaussian
+set MESphaleron:FreezeGaussianParams Yes
+set MESphaleron:FreezeGaussianParamsScale 15000*GeV
+set MESphaleron:NumBosonParamA1 -19.0
+set MESphaleron:NumBosonParamA2 6.0E-3
+set MESphaleron:NumBosonParamB1 7.4
+set MESphaleron:NumBosonParamB2 3.0E-3
+
+# the unitarity limit enforcement
+set MESphaleron:EnforceUnitarityLimit No
+set MESphaleron:EnforceUnitarityLimitScale 1.E4*GeV
+
+insert /Herwig/Generators/EventGenerator:AnalysisHandlers 0 /Herwig/Analysis/HepMCFile
+set /Herwig/Analysis/HepMCFile:PrintEvent 10000
+set /Herwig/Analysis/HepMCFile:Format GenEvent
+set /Herwig/Analysis/HepMCFile:Units GeV_mm
+
+
+####################################################################
+## PDF settings #
+#####################################################################
+## You may wish to use the same PDF as the events were generated with
+create ThePEG::LHAPDF /Herwig/Partons/LHAPDF ThePEGLHAPDF.so
+set /Herwig/Partons/LHAPDF:PDFName MSTW2008lo68cl
+set /Herwig/Partons/RemnantDecayer:AllowTop Yes
+set /Herwig/Partons/LHAPDF:RemnantHandler /Herwig/Partons/HadronRemnants
+set /Herwig/Particles/p+:PDF /Herwig/Partons/LHAPDF
+set /Herwig/Particles/pbar-:PDF /Herwig/Partons/LHAPDF
+set /Herwig/Partons/PPExtractor:FirstPDF  /Herwig/Partons/LHAPDF
+set /Herwig/Partons/PPExtractor:SecondPDF /Herwig/Partons/LHAPDF
+
+cd /Herwig/Generators
+
+##################################################
+# Save run for later usage with 'Herwig run'
+##################################################
+saverun PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL EventGenerator
