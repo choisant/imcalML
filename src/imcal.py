@@ -144,9 +144,13 @@ class Hdf5Dataset(Dataset):
 	def label_maker(self, value, labels):
 		#Creates labels for the classes. The first class gets value [1, 0, .., 0], the next [0, 1, ..., 0] etc
 		#Only works if labels match data labels
+		idx = None
 		for i, label in enumerate(labels):
 			if value in label:
-				idx = i
+				idx = i	
+		if idx==None:
+			print(f"{value}, not in {labels}")
+
 		vector = np.zeros(len(labels))
 		vector[idx] = 1
 		#Outputs a tensor
@@ -284,13 +288,13 @@ def plot_conf_matrix(confusion, accuracy, labels):
 """
 Histogram creation
 """
-def create_histograms(x, y, z, max_events:int, res:int):
-    max_available_events = len(x)
+def create_histograms(phi, eta, energy, max_events:int, res:int):
+    max_available_events = len(phi)
     if max_available_events < max_events:
         max_events = max_available_events
-    Cal = [histogram2d(x[i], y[i], 
+    Cal = [histogram2d(phi[i], eta[i], 
             range=[[-np.pi, np.pi], [-5, 5]], bins=res, 
-            weights=z[i]) 
+            weights=energy[i]) 
             for i in range(0, max_events)]
     return Cal
 

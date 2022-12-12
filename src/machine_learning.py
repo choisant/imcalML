@@ -31,21 +31,27 @@ def test(net, data, res:int, device, optimizer, scheduler, size:int = 32):
     val_acc, val_loss = fwd_pass(net, X, y, res, device, optimizer, scheduler, train=False)
     return val_acc, val_loss
     
-def predict(net, data, size:int, res:int, device):
+def predict(net, data, size:int, res:int, device, return_loss=False):
     #Returns the predictions (as class number values)
     dataset = DataLoader(data, size, shuffle=False) #shuffle data and choose batch size
     prediction = torch.zeros((len(dataset), size))
     truth = torch.zeros((len(dataset), size))
+    losses = torch.zeros((len(dataset), size))
     i = 0
     net.eval()
     with torch.no_grad():
         for data in tqdm(dataset):
             X, y = data
             outputs = net(X.view(-1, 3, res, res).to(device))
+            losses[i] = F.cross_entropy(outputs, torch.argmax(y,dim=-1).to(device)) 
             prediction[i] = torch.argmax(outputs, dim=-1)
             truth[i] = torch.argmax(y, dim=-1)
             i = i+1
-    return torch.flatten(truth), torch.flatten(prediction)
+
+    if return_loss:
+        return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses)
+    else:
+        return torch.flatten(truth), torch.flatten(prediction)
 
 def train(net, traindata, testdata, size:int, epochs:int, res:int, device, optimizer, scheduler):
     dataset = DataLoader(traindata, size, shuffle=True)
