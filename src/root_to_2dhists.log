@@ -686,3 +686,47 @@ INFO:root:Padding towers to size: 551
 INFO:root:Padding tracks to size: 426
 INFO:root:Image data shape: (3000, 50, 50, 3)
 INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n2_M12_test_3000_events.h5
+INFO:root://2022-12-13 11:07:25.638827//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n2_M10_10000events.root
+INFO:root:Number of events loaded: [10000]
+INFO:root:Padding towers to size: 596
+INFO:root:Padding tracks to size: 427
+INFO:root:Image data shape: (10000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n2_M10_10000_events.h5
+INFO:root://2022-12-13 11:12:34.606147//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n4_M10_10000events.root
+INFO:root:Number of events loaded: [10000]
+INFO:root:Padding towers to size: 619
+INFO:root:Padding tracks to size: 506
+INFO:root:Image data shape: (10000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n4_M10_10000_events.h5
+INFO:root://2022-12-13 11:16:31.237299//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n6_M10_10000events.root
+INFO:root:Number of events loaded: [10000]
+INFO:root:Padding towers to size: 559
+INFO:root:Padding tracks to size: 419
+INFO:root:Image data shape: (10000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n6_M10_10000_events.h5
+INFO:root://2022-12-13 11:19:34.103864//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n2_M10_3000events.root
+INFO:root://2022-12-13 11:20:43.864134//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n2_M10_3000events.root
+INFO:root:Number of events loaded: [3000]
+INFO:root:Padding towers to size: 533
+INFO:root:Padding tracks to size: 431
+INFO:root:Image data shape: (3000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n2_M10_test_3000_events.h5
+INFO:root://2022-12-13 11:23:39.748575//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n4_M10_3000events.root
+INFO:root:Number of events loaded: [3000]
+INFO:root:Padding towers to size: 569
+INFO:root:Padding tracks to size: 417
+INFO:root:Image data shape: (3000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n4_M10_test_3000_events.h5
+INFO:root://2022-12-13 11:29:32.364295//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n6_M10_3000events.root
+INFO:root:Number of events loaded: [3000]
+INFO:root:Padding towers to size: 577
+INFO:root:Padding tracks to size: 444
+INFO:root:Image data shape: (3000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n6_M10_test_3000_events.h5

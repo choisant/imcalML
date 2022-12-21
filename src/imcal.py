@@ -258,9 +258,18 @@ def cal_image_plot(ax):
     ax.set_ylabel(r"$\phi$ [radians]", fontsize=16)
     ax.set_xlabel(r"$\eta$", fontsize=16)
     #ax.set_title("Calorimeter image", fontsize=20, color="black")
-    ax.tick_params(which="both", direction="inout", top=True, right=True, labelsize=14, pad=15, length=4, width=2)
-    ax.tick_params(which="major", length=8)
+    ax.tick_params(which="both", direction="inout", bottom=True, left=True, labelsize=14, pad=15, length=4, width=2)
     ax.tick_params(which="major", length=6)
+    ax.minorticks_on()
+
+def cal_image_plot_paper(ax):
+    """
+    Formating of calorimeter image
+    """
+    ax.set_ylabel(r"$\phi$ [radians]", fontsize=24)
+    ax.set_xlabel(r"$\eta$", fontsize=24)
+    #ax.set_title("Calorimeter image", fontsize=20, color="black")
+    ax.tick_params(which="both", direction="out", bottom=True, left=True, labelsize=20, pad=15, length=6, width=3)
     ax.minorticks_on()
 
 def plot_conf_matrix(confusion, accuracy, labels):
