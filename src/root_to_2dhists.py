@@ -18,7 +18,7 @@ the imcal.py script in the same folder as this script.
 
 Example usage:
 cd src
-python ./root_to_2dfhists.py -f "/my/data/rootfiles/higgs.root" -s "/my/data/histograms/" -n "higgs" -r 50 -N 1000
+python ./root_to_2dhists.py -f "/my/data/rootfiles/higgs.root" -s "/my/data/histograms/" -n "higgs" -r 50 -N 1000
 
 """
 
@@ -70,7 +70,7 @@ clusters = ak.pad_none(clusters, max_hits, axis=-1)
 #Pad track data
 max_hits = np.max([len(event) for event in tracks["Eta"]])
 logging.info(f"Padding tracks to size: {max_hits}")
-tracks = [ak.pad_none(item, max_hits, axis=-1) for item in tracks]
+tracks = ak.pad_none(tracks, max_hits, axis=-1)
 
 # Creating the histograms
 hists_Eem = create_histograms(ak.to_numpy(clusters.Phi), ak.to_numpy(clusters.Eta), 
