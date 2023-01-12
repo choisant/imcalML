@@ -43,3 +43,13 @@ The detector is simulated using the fast simulaton tool [Delphes](https://cp3.ir
 ```
 ./DelphesHepMC2 ./cards/delphes_card_ATLAS.tcl /path/to/storage/folder/BH_n5_M8_10000events.root  ../HerwigBuilds/BlackMax/BH_n5_M8/BH_n5_M8.hepmc
 ```
+
+## Sphalerons
+
+[https://gitlab.com/apapaefs/instantons](https://gitlab.com/apapaefs/instantons)
+Generating these files require you to have a working installation of Herwig7, python 3 and a lot of patience. Instructions are unfortunately not available except on request (as of January 2023), but hopefully this will change.
+
+
+## Other more normal event types
+
+ROOT files can be generated using either Herwig7 + Delphes or Pythia + Delphes. There are many nice tutorials available.
