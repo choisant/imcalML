@@ -11,7 +11,7 @@ To produce sphalerons we want to use the [instantons](https://gitlab.com/apapaef
 ## Black holes
 
 ### Parton level production
-The black hole events are generated using [BlackMax](https://blackmax.hepforge.org/). It should be installed using the same method and compiler as [LHAPDF](https://lhapdf.hepforge.org/install.html). For this experiment, both tools must be installed. This tool produces black holes and lets them decay. It can be connected to a LHAPDF library to access non-standard PDFs, and it can also be connected to PYTHIA to perform hadronisation. We want our events to be produced in the most similar way, so we choose the option of using LHAPDF and choose the same PDF as we use in Herwig for the sphaleron production. Instructions for how to do this are found in the README file of BlackMax. BlackMax parameters are controlled easily using the `parameters.txt` file. An example file is found in this directory. Note especially these parameters: 
+The black hole events are generated using [BlackMax](https://blackmax.hepforge.org/). It should be installed using the same method and compiler as [LHAPDF](https://lhapdf.hepforge.org/install.html). For this experiment, both tools must be installed. BlackMax produces black holes and lets them decay. It can be connected to a LHAPDF library to access non-standard PDFs, and it can also be connected to PYTHIA to perform hadronisation. We want our events to be produced in the most similar way, so we choose the option of using LHAPDF and choose the same PDF as we use in Herwig for the sphaleron production. Instructions for how to do this are found in the README file of BlackMax. BlackMax parameters are controlled easily using the `parameters.txt` file. An example file is found in this directory. Note especially these parameters: 
 ```
 Number_of_simulations
 11000
@@ -35,11 +35,11 @@ Running the program produces a Les Hauches Accord file (`BlackMaxLHArecord.lhe`)
 
 ### Hadronization
 
-The events are hadronized using Herwig7. If Herwig is working for production of sphalerons it should be fine to get it working for black holes as well. 
+The events are hadronized using Herwig7. If Herwig is working for production of sphalerons it should be fine to get it working for black holes as well. The `LHA_reader.in` file can be used as a template to see how to import a .lhe file, set the right PDF and save the output hepmc file (HepMC2!).
 
 ## Detector simulation
 
-The detector is simulated using the fast simulaton tool [Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes). Delphes should be installed using a newer gcc. Installation instructions can be found [here](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/QuickTour). The hepmc files produced in Herwig are of the older hepmc2 format. Navigate to the Delphes installation folder and run the simulation:
+The detector is simulated using the fast simulaton tool [Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes). Delphes should be installed using a newer gcc and python 3. Installation instructions can be found [here](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/QuickTour). The hepmc files produced in Herwig are of the older hepmc2 format. Navigate to the Delphes installation folder and run the simulation:
 ```
 ./DelphesHepMC2 ./cards/delphes_card_ATLAS.tcl /path/to/storage/folder/BH_n5_M8_10000events.root  ../HerwigBuilds/BlackMax/BH_n5_M8/BH_n5_M8.hepmc
 ```
