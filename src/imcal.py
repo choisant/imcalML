@@ -298,6 +298,12 @@ def plot_conf_matrix(confusion, accuracy, labels):
 Histogram creation
 """
 def create_histograms(phi, eta, energy, max_events:int, res:int):
+
+    """
+    Creates histograms based on the phi, eta and energy/pt data points in the calorimeter/track system.
+    fasthistogram is 20-25 x faster than numpy.histogram2d. Similar to numpy it produces a 2D histogram
+    with input 1 along the y-axis and input 2 along the x-axis.
+    """
     max_available_events = len(phi)
     if max_available_events < max_events:
         max_events = max_available_events

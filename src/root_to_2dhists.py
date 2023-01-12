@@ -14,7 +14,8 @@ outputs a .hdf5 file and a log file. The root file must be made using Delphes, a
 can be changed to work with different root files.
 The created hdf5 file has the two datasets, "image" and "labels" which can be used for machine learning purpose.
 Each image has the resolution set in this script, and the label given by the filename. The functions used in the script can be found in
-the imcal.py script in the same folder as this script.
+the imcal.py script in the same folder as this script. Eta(phi) is along x(y)-axis of the created histogram when viewed using the 
+matplotlib imshow function.
 
 Example usage:
 cd src
