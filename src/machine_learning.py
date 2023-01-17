@@ -59,6 +59,35 @@ def predict(net, testdata, num_classes, size:int, res:int, device, return_loss=F
     else:
         return torch.flatten(truth), torch.flatten(prediction)
 
+
+def shuffle_predict(net, testdata, num_classes, size:int, res:int, device, return_loss=False, return_values=False):
+    #Returns the predictions (as class number values)
+    dataset = DataLoader(testdata, size, shuffle=True) #shuffle data and choose batch size
+    prediction = torch.zeros((len(dataset), size))
+    truth = torch.zeros((len(dataset), size))
+    losses = torch.zeros((len(dataset), size))
+    values = torch.zeros((len(dataset), size, num_classes))
+    i = 0
+    net.eval()
+    with torch.no_grad():
+        for data in tqdm(dataset):
+            X, y = data
+            outputs = net(X.view(-1, 3, res, res).to(device))
+            values[i] = torch.softmax(outputs,dim=-1)
+            losses[i] = F.cross_entropy(outputs, torch.argmax(y,dim=-1).to(device)) 
+            prediction[i] = torch.argmax(outputs, dim=-1)
+            truth[i] = torch.argmax(y, dim=-1)
+            i = i+1
+
+    if return_loss and not return_values:
+        return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses)
+    elif return_values and not return_loss:
+        return torch.flatten(truth), torch.flatten(prediction), values.view(len(testdata), num_classes)
+    elif return_loss and return_values:
+        return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses), values.view(len(testdata), num_classes)
+    else:
+        return torch.flatten(truth), torch.flatten(prediction)
+
 def train(net, traindata, testdata, size:int, epochs:int, res:int, device, optimizer, scheduler):
     dataset = DataLoader(traindata, size, shuffle=True)
     df_labels = ["Loss", "Accuracy", "Validation loss", "Validation accuracy", "Epoch", "Iteration"]
