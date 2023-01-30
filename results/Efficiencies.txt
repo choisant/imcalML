@@ -1,0 +1,48 @@
+Efficiency for N >= 5 and ST >= 6:
+BH_n4_M8: 0.39
+BH_n4_M10: 0.63
+BH_n4_M12: 0.71
+BH_n2_M10: 0.73
+BH_n4_M10: 0.63
+BH_n6_M10: 0.57
+SPH_9TeV: 0.56
+Efficiency for N >= 5 and ST >= 7:
+BH_n4_M8: 0.17
+BH_n4_M10: 0.51
+BH_n4_M12: 0.65
+BH_n2_M10: 0.56
+BH_n4_M10: 0.51
+BH_n6_M10: 0.44
+SPH_9TeV: 0.2
+Efficiency for N >= 6 and ST >= 6:
+BH_n4_M8: 0.22
+BH_n4_M10: 0.42
+BH_n4_M12: 0.49
+BH_n2_M10: 0.56
+BH_n4_M10: 0.42
+BH_n6_M10: 0.37
+SPH_9TeV: 0.53
+Efficiency for N >= 6 and ST >= 7:
+BH_n4_M8: 0.08
+BH_n4_M10: 0.34
+BH_n4_M12: 0.45
+BH_n2_M10: 0.43
+BH_n4_M10: 0.34
+BH_n6_M10: 0.28
+SPH_9TeV: 0.19
+Efficiency for N >= 7 and ST >= 6:
+BH_n4_M8: 0.11
+BH_n4_M10: 0.24
+BH_n4_M12: 0.28
+BH_n2_M10: 0.36
+BH_n4_M10: 0.24
+BH_n6_M10: 0.2
+SPH_9TeV: 0.44
+Efficiency for N >= 7 and ST >= 7:
+BH_n4_M8: 0.04
+BH_n4_M10: 0.19
+BH_n4_M12: 0.26
+BH_n2_M10: 0.28
+BH_n4_M10: 0.19
+BH_n6_M10: 0.15
+SPH_9TeV: 0.15
