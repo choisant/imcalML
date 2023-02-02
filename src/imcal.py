@@ -394,7 +394,7 @@ def load_datasets(input_files:list, device, n_events:int, filters=None, transfor
 Data storing
 """
 
-def store_hists_hdf5(images, savepath, filename, meta):
+def store_hists_hdf5(images, savepath, filename, meta, cut=False):
     """ Stores an array of images to HDF5.
         Parameters:
         ---------------
@@ -403,10 +403,16 @@ def store_hists_hdf5(images, savepath, filename, meta):
     """
     n_events = meta["Events"]
     res = meta["Resolution"]
-    #For logging
-    path = (f"{savepath}/{filename}_{n_events}_events.h5")
+    ST_cut = int(meta["ST_min"])
+    N_cut = meta["N_min"]
+
     # Create a new HDF5 file
-    file = h5py.File(f"{savepath}/{filename}_res{res}_{n_events}_events.h5", "w")
+    if cut:
+        path = Path(f"{savepath}/{filename}_res{res}_STmin{ST_cut}_Nmin{N_cut}_{n_events}_events.h5")
+        file = h5py.File(path, "w")
+    else:
+        path = Path(f"{savepath}/{filename}_res{res}_{n_events}_events.h5")
+        file = h5py.File(path, "w")
 
     # Create datasets in the file
     for i, image in enumerate(images):
