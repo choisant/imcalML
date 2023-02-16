@@ -101,6 +101,8 @@ muons = load_data(data_path, MAX_EVENTS, "Muon",
 photons = load_data(data_path, MAX_EVENTS, "Photon", 
                         ["Photon.PT", "Photon.Eta", "Photon.Phi"])
 
+eventid = load_data(data_path, MAX_EVENTS, "Event", ["Event.Number"])
+
 jets, n_jets = cut_pt_eta(jets, min_pt, max_eta)
 electrons, n_electrons = cut_pt_eta(electrons, min_pt, max_eta)
 muons, n_muons = cut_pt_eta(muons, min_pt, max_eta)
@@ -149,7 +151,8 @@ meta = {
     "Events" : MAX_EVENTS,
     "Input" : data_path,
     "ST_min" : ST_min,
-    "N_min" : N_min
+    "N_min" : N_min,
+    "Event_ID" : ak.to_numpy(eventid)
 }
 
 #Save

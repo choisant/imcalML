@@ -56,7 +56,7 @@ class CalorimeterDataset(data.Dataset):
 
 class Hdf5Dataset(Dataset):
 	
-	def __init__(
+    def __init__(
 		self,
 		filepaths: Union[Path,str],
 		labels: list[str],
@@ -67,7 +67,7 @@ class Hdf5Dataset(Dataset):
 		event_limit: Optional[int] = None
 
 	):
-		r"""
+        r"""
 		Args:
 			filepaths (list[Path or str]): Path to HDF5 files
 			labels (list[str]): labels corresponding to the labels in the HDF5 files
@@ -78,83 +78,92 @@ class Hdf5Dataset(Dataset):
 			transform (Callable, optional): Function for data transforms
 			event_limit (int, optional): Limit number of events in dataset. Clips the file from the start. 
 		"""
-		super().__init__()
+        super().__init__()
 		
-		self.filepaths = filepaths
-		self.labels = labels
-		self.device = device
-		self.shuffle = shuffle
-		self.filters = filters
-		self.transform = transform
-		self.event_limit = event_limit
+        self.filepaths = filepaths
+        self.labels = labels
+        self.device = device
+        self.shuffle = shuffle
+        self.filters = filters
+        self.transform = transform
+        self.event_limit = event_limit
 
-		# Open file descriptors and get event keys
-		# Store file name along with key, to keep track
+        # Open file descriptors and get event keys
+        # Store file name along with key, to keep track
 
-		self._files = {}
-		self._event_keys = []
-		for full_file_path in filepaths:
-			if os.path.exists(full_file_path):
-				fd = h5py.File(full_file_path, 'r')
-				filename = full_file_path.name.__str__()
-				self._files[filename] = fd
-				# Limit number of events, this always chooses the first :event_limit events.
-				if event_limit:
-					event_keys = list(fd.keys())[:event_limit]
-				else:
-					event_keys = list(fd.keys())
-				event_keys = [(filename, key) for key in event_keys]
-				self._event_keys += event_keys
-			else:
-				print(f'No file found in {full_file_path}')
+        self._files = {}
+        self._event_keys = []
+        for full_file_path in filepaths:
+            if os.path.exists(full_file_path):
+                fd = h5py.File(full_file_path, 'r')
+                filename = full_file_path.name.__str__()
+                self._files[filename] = fd
+                # Limit number of events, this always chooses the first :event_limit events.
+                if event_limit:
+                    event_keys = list(fd.keys())[:event_limit]
+                else:
+                    event_keys = list(fd.keys())
+                event_keys = [(filename, key) for key in event_keys]
+                self._event_keys += event_keys
+            else:
+                print(f'No file found in {full_file_path}')
+
+        assert len(self._files) > 0, f'No files loaded'
 		
-		assert len(self._files) > 0, f'No files loaded'
-		
-		# Shuffle keys
-		if (shuffle):
-			randomshuffle(self._event_keys)
+        # Shuffle keys
+        if (shuffle):
+            randomshuffle(self._event_keys)
 
-	def __len__(self):
-		return len(self._event_keys)
+    def __len__(self):
+        return len(self._event_keys)
 
-	def __getitem__(self, idx):
-		
-		if torch.is_tensor(idx):
-			idx = idx.tolist()
-		
-		filename, key = self._event_keys[idx]
-		group = self._files[filename].get(key)
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
 
-		#convert label from string to tensor
-		label = group.get('label')[()].decode()
-		label = self.label_maker(label, self.labels)
-		
-		#convert data from numpy histogram to tensor
-		data = group.get('data')[()]
-		# GTX cards are single precision only
-		data = torch.from_numpy(data)
-		data = apply_filters(self.filters, data, maxvalue=5000)
+        filename, key = self._event_keys[idx]
+        group = self._files[filename].get(key)
 
-		#Apply transforms
-		if self.transform:
-			data = self.transform(data)
+        #convert label from string to tensor
+        label = group.get('label')[()].decode()
+        label = self.label_maker(label, self.labels)
 
-		return (data.to(self.device), label.to(self.device))
+        #convert data from numpy histogram to tensor
+        data = group.get('data')[()]
+        # GTX cards are single precision only
+        data = torch.from_numpy(data)
+        data = apply_filters(self.filters, data, maxvalue=5000)
 
-	def label_maker(self, value, labels):
-		#Creates labels for the classes. The first class gets value [1, 0, .., 0], the next [0, 1, ..., 0] etc
-		#Only works if labels match data labels
-		idx = None
-		for i, label in enumerate(labels):
-			if value in label:
-				idx = i	
-		if idx==None:
-			print(f"{value}, not in {labels}")
+        #Apply transforms
+        if self.transform:
+            data = self.transform(data)
 
-		vector = np.zeros(len(labels))
-		vector[idx] = 1
-		#Outputs a tensor
-		return torch.from_numpy(vector)
+        return (data.to(self.device), label.to(self.device))
+
+    def getids(self):
+        event_ids = []
+        for filename, key in self._event_keys:
+            group = self._files[filename].get(key)
+            #Get event id
+            event_id = group.get("event_id")[()]
+            event_ids.append(event_id.tolist())
+        event_ids = np.array(event_ids)
+        return(event_ids)
+
+    def label_maker(self, value, labels):
+        #Creates labels for the classes. The first class gets value [1, 0, .., 0], the next [0, 1, ..., 0] etc
+        #Only works if labels match data labels
+        idx = None
+        for i, label in enumerate(labels):
+            if value in label:
+                idx = i	
+        if idx==None:
+            print(f"{value}, not in {labels}")
+
+        vector = np.zeros(len(labels))
+        vector[idx] = 1
+        #Outputs a tensor
+        return torch.from_numpy(vector)
 
 class RandomRoll(torch.nn.Module):
     """
@@ -297,7 +306,7 @@ def plot_conf_matrix(confusion, accuracy, labels):
 """
 Histogram creation
 """
-def create_histograms(phi, eta, energy, max_events:int, res:int):
+def create_histograms(phi, eta, energy, max_events:int, res:int, max_eta:int=5):
 
     """
     Creates histograms based on the phi, eta and energy/pt data points in the calorimeter/track system.
@@ -308,7 +317,7 @@ def create_histograms(phi, eta, energy, max_events:int, res:int):
     if max_available_events < max_events:
         max_events = max_available_events
     Cal = [histogram2d(phi[i], eta[i], 
-            range=[[-np.pi, np.pi], [-5, 5]], bins=res, 
+            range=[[-np.pi, np.pi], [-max_eta, max_eta]], bins=res, 
             weights=energy[i]) 
             for i in range(0, max_events)]
     return Cal
@@ -403,8 +412,12 @@ def store_hists_hdf5(images, savepath, filename, meta, cut=False):
     """
     n_events = meta["Events"]
     res = meta["Resolution"]
-    ST_cut = int(meta["ST_min"])
-    N_cut = meta["N_min"]
+    eventid = meta["Event_ID"]
+    
+    if cut:
+        ST_cut = int(meta["ST_min"])
+        N_cut = meta["N_min"]
+
 
     # Create a new HDF5 file
     if cut:
@@ -422,6 +435,9 @@ def store_hists_hdf5(images, savepath, filename, meta, cut=False):
         )
         labelset = group.create_dataset(
             "label", np.shape(filename), data=filename
+        )
+        eventidset = group.create_dataset(
+            "event_id", np.shape(eventid[i]), data=eventid[i]
         )
     file.close()
     return path

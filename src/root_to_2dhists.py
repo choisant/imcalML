@@ -59,7 +59,8 @@ clusters = load_data(data_path, MAX_EVENTS, "Tower",
                         ["Tower.ET", "Tower.Eta", "Tower.Phi", "Tower.Eem", "Tower.Ehad", "Tower.E"])
 tracks = load_data(data_path, MAX_EVENTS, "Track", 
                         ["Track.PT", "Track.Eta", "Track.Phi"])
-MAX_EVENTS = len(clusters)
+
+eventid = load_data(data_path, MAX_EVENTS, "Event", ["Event.Number"])
 
 logging.info(f"Number of events loaded: {len(clusters)}")
 
@@ -89,7 +90,8 @@ logging.info(f"Image data shape: {images.shape}")
 meta = {
     "Resolution": RESOLUTION,
     "Events" : MAX_EVENTS,
-    "Input" : data_path
+    "Input" : data_path,
+    "Event_ID" : ak.to_numpy(eventid)
 }
 
 #Save
