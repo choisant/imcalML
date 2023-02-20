@@ -55,7 +55,6 @@ class CalorimeterDataset(data.Dataset):
         return image, label
 
 class Hdf5Dataset(Dataset):
-	
     def __init__(
 		self,
 		filepaths: Union[Path,str],
@@ -63,10 +62,11 @@ class Hdf5Dataset(Dataset):
         device: torch.device,
 		shuffle: bool = True,
 		filters: Optional[list[str]] = None,
+        max_value: Optional[list[str]] = 5000,
 		transform: Optional[Callable] = None,
-		event_limit: Optional[int] = None
-
-	):
+        event_limit: Optional[int] = None
+        
+        ):
         r"""
 		Args:
 			filepaths (list[Path or str]): Path to HDF5 files
@@ -85,6 +85,7 @@ class Hdf5Dataset(Dataset):
         self.device = device
         self.shuffle = shuffle
         self.filters = filters
+        self.max_value = max_value
         self.transform = transform
         self.event_limit = event_limit
 
@@ -132,7 +133,7 @@ class Hdf5Dataset(Dataset):
         data = group.get('data')[()]
         # GTX cards are single precision only
         data = torch.from_numpy(data)
-        data = apply_filters(self.filters, data, maxvalue=5000)
+        data = apply_filters(self.filters, data, maxvalue=self.max_value)
 
         #Apply transforms
         if self.transform:
@@ -200,8 +201,6 @@ Data processing
 def apply_filters(key_list, image, maxvalue=2000):
     if key_list!=None:
         for key in key_list:
-            #print(f"Applying {key} filter.")
-            
             if key=="saturate":
                 image[image>maxvalue] = maxvalue
             
@@ -316,9 +315,9 @@ def create_histograms(phi, eta, energy, max_events:int, res:int, max_eta:int=5):
     max_available_events = len(phi)
     if max_available_events < max_events:
         max_events = max_available_events
-    Cal = [histogram2d(phi[i], eta[i], 
+    Cal = [np.histogram2d(phi[i], eta[i], 
             range=[[-np.pi, np.pi], [-max_eta, max_eta]], bins=res, 
-            weights=energy[i]) 
+            weights=energy[i])[0] 
             for i in range(0, max_events)]
     return Cal
 
