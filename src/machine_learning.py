@@ -36,16 +36,20 @@ def predict(net, testdata, num_classes, size:int, res:int, device, return_loss=F
     dataset = DataLoader(testdata, size, shuffle=False) #shuffle data and choose batch size
     prediction = torch.zeros((len(dataset), size))
     truth = torch.zeros((len(dataset), size))
-    losses = torch.zeros((len(dataset), size))
-    values = torch.zeros((len(dataset), size, num_classes))
+    if return_loss:
+        losses = torch.zeros((len(dataset), size))
+    if return_values:
+        values = torch.zeros((len(dataset), size, num_classes))
     i = 0
     net.eval()
     with torch.no_grad():
         for data in tqdm(dataset):
             X, y = data
             outputs = net(X.view(-1, 3, res, res).to(device))
-            values[i] = torch.softmax(outputs,dim=-1)
-            losses[i] = F.cross_entropy(outputs, torch.argmax(y,dim=-1).to(device)) 
+            if return_values:
+                values[i] = torch.softmax(outputs,dim=-1)
+            if return_loss:
+                losses[i] = F.cross_entropy(outputs, torch.argmax(y,dim=-1).to(device)) 
             prediction[i] = torch.argmax(outputs, dim=-1)
             truth[i] = torch.argmax(y, dim=-1)
             i = i+1

@@ -62,12 +62,18 @@ else:
     sys.exit(1)
 
 #Functions
-def cut_pt_eta(array, min_pt, max_eta):
+def cut_pt_eta(array, pt_min, eta_max):
     array = ak.pad_none(array, 1, axis=-1)
-    array = array[array.PT > min_pt]
-    array = array[abs(array.Eta) < max_eta]
+    array = array[array.PT > pt_min]
+    array = array[abs(array.Eta) < eta_max]
     n = np.array([len(event) for event in array.PT])
     return array, n
+
+def cut_pt_eta_met(array, pt_min, eta_max):
+    array = ak.pad_none(array, 1, axis=-1)
+    array = array[array.MET > pt_min]
+    array = array[abs(array.Eta) < eta_max]
+    return array
 
 def calculate_ST(jets, muons, electrons, photons, met):
     ST = np.zeros(MAX_EVENTS)
@@ -80,33 +86,34 @@ def calculate_ST(jets, muons, electrons, photons, met):
     return ST
 
 #Load data
-clusters = load_data(data_path, MAX_EVENTS, "Tower", 
-                        ["Tower.ET", "Tower.Eta", "Tower.Phi", "Tower.Eem", "Tower.Ehad", "Tower.E"])
+clusters = load_data(data_path, "Tower", 
+                        ["Tower.ET", "Tower.Eta", "Tower.Phi", "Tower.Eem", "Tower.Ehad"])
 
-tracks = load_data(data_path, MAX_EVENTS, "Track", 
+tracks = load_data(data_path, "Track", 
                         ["Track.PT", "Track.Eta", "Track.Phi"])
 
-jets = load_data(data_path, MAX_EVENTS, "Jet", 
-                            ["Jet.PT", "Jet.Eta", "Jet.Phi"])
+jets = load_data(data_path, "Jet", 
+                            ["Jet.PT", "Jet.Eta"])
                 
-met = load_data(data_path, MAX_EVENTS, "MissingET", 
-                        ["MissingET.MET", "MissingET.Eta", "MissingET.Phi"])
+met = load_data(data_path, "MissingET", 
+                        ["MissingET.MET", "MissingET.Eta"])
 
-electrons = load_data(data_path, MAX_EVENTS, "Electron", 
-                        ["Electron.PT", "Electron.Eta", "Electron.Phi", "Electron.Charge"])
+electrons = load_data(data_path, "Electron", 
+                        ["Electron.PT", "Electron.Eta"])
 
-muons = load_data(data_path, MAX_EVENTS, "Muon", 
-                        ["Muon.PT", "Muon.Eta", "Muon.Phi", "Muon.Charge"])
+muons = load_data(data_path, "Muon", 
+                        ["Muon.PT", "Muon.Eta"])
 
-photons = load_data(data_path, MAX_EVENTS, "Photon", 
-                        ["Photon.PT", "Photon.Eta", "Photon.Phi"])
+photons = load_data(data_path, "Photon", 
+                        ["Photon.PT", "Photon.Eta"])
 
-eventid = load_data(data_path, MAX_EVENTS, "Event", ["Event.Number"])
+eventid = load_data(data_path, "Event", ["Event.Number"])
 
 jets, n_jets = cut_pt_eta(jets, min_pt, max_eta)
 electrons, n_electrons = cut_pt_eta(electrons, min_pt, max_eta)
 muons, n_muons = cut_pt_eta(muons, min_pt, max_eta)
 photons, n_photons = cut_pt_eta(photons, min_pt, max_eta)
+met = cut_pt_eta_met(met, min_pt, max_eta)
 
 ST = calculate_ST(jets, muons, electrons, photons, met)
 N = np.array(n_jets) + np.array(n_electrons) + np.array(n_muons) + np.array(n_photons)
@@ -118,10 +125,17 @@ cut_idx = np.intersect1d(ST_idx, N_idx)
 logging.info(f"Applying ST min cut: {ST_min} and N min cut: {N_min}")
 clusters = clusters[cut_idx]
 tracks = tracks[cut_idx]
+eventid = eventid[cut_idx]
 CUT_EVENTS = len(clusters)
 
 logging.info(f"Number of events loaded: {MAX_EVENTS}")
 logging.info(f"Number of events after cut: {CUT_EVENTS}")
+
+#Stop process if there are not enough events
+if CUT_EVENTS < MAX_EVENTS:
+    print("Number of events after cut does not match number of events specified by user.")
+    logging.error("Number of events after cut does not match number of events specified by user.")
+    sys.exit()
 
 #Pad Tower data
 max_hits = np.max([len(event) for event in clusters["Eta"]])

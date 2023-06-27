@@ -96,14 +96,25 @@ class Hdf5Dataset(Dataset):
         self._event_keys = []
         for full_file_path in filepaths:
             if os.path.exists(full_file_path):
+                print(f"Opening file {full_file_path}.")
                 fd = h5py.File(full_file_path, 'r')
                 filename = full_file_path.name.__str__()
                 self._files[filename] = fd
                 # Limit number of events, this always chooses the first :event_limit events.
                 if event_limit:
-                    event_keys = list(fd.keys())[:event_limit]
+                    max_events = len(fd.keys())
+                    if event_limit > max_events:
+                        print(f"Number of events requested are greater than number of events in file: {max_events}.")
+                        exit()
+                    else: 
+                        n_events = event_limit
+                    print(f"Selecting {n_events} events out of {max_events}.")
+                    event_keys = list(fd.keys())[:n_events]
                 else:
+                    max_events = len(fd.keys())
+                    print(f"Selecting all {max_events} events.")
                     event_keys = list(fd.keys())
+                #Make event keys a tuple cointaining the filename and the key.
                 event_keys = [(filename, key) for key in event_keys]
                 self._event_keys += event_keys
             else:
@@ -131,6 +142,7 @@ class Hdf5Dataset(Dataset):
 
         #convert data from numpy histogram to tensor
         data = group.get('data')[()]
+        data = np.float32(data)
         # GTX cards are single precision only
         data = torch.from_numpy(data)
         data = apply_filters(self.filters, data, maxvalue=self.max_value)
@@ -305,40 +317,44 @@ def plot_conf_matrix(confusion, accuracy, labels):
 """
 Histogram creation
 """
-def create_histograms(phi, eta, energy, max_events:int, res:int, max_eta:int=5):
+def create_histograms(phi:np.array, eta:np.array, energy:np.array, max_events:int, res:int, max_eta:int=5):
 
     """
     Creates histograms based on the phi, eta and energy/pt data points in the calorimeter/track system.
-    fasthistogram is 20-25 x faster than numpy.histogram2d. Similar to numpy it produces a 2D histogram
-    with input 1 along the y-axis and input 2 along the x-axis.
+    It produces a 2D histogram with input 1 along the y-axis and input 2 along the x-axis.
     """
     max_available_events = len(phi)
     if max_available_events < max_events:
-        max_events = max_available_events
-    Cal = [np.histogram2d(phi[i], eta[i], 
+        print("Number of events specified by user exceeds number of available events.")
+        sys.exit()
+    #The arrays are masked arrays after padding, so they must be compressed.
+    hist = [np.histogram2d(phi[i].compressed(), eta[i].compressed(), 
             range=[[-np.pi, np.pi], [-max_eta, max_eta]], bins=res, 
-            weights=energy[i])[0] 
+            weights=energy[i].compressed())[0] 
             for i in range(0, max_events)]
-    return Cal
+    return hist
 
 """
 Data loading
 """
 
-def load_data(rootfile:str, n_events:int, branch:str, keys:list):
+def load_data(rootfile:str, branch:str, keys:list, n_events:int=-1):
     """
     Loads the data as awkward array. Opens the file and extracts the data before closing it again.
     """
     with uproot.open(rootfile) as file:
         valid_list = [key in file.keys() for key in keys]
         if valid_list and n_events>0:
+            #print(f"Loading {n_events} events from branch {branch}, fields {keys}.")
             arr = file[branch].arrays(keys, library="ak", how="zip")[0:n_events]
             return arr[branch]
         elif valid_list and n_events<0:
+            #print(f"Loading all events from branch {branch}, fields {keys}.")
             arr = file[branch].arrays(keys, library="ak", how="zip")
             return arr[branch]
         else:
             print(keys[not(valid_list)], " not present in data.")
+
 
 def load_hd5_histogram(path:Path, n_events:int, filters):
     with h5py.File(path) as f:
@@ -363,10 +379,14 @@ def load_datasets(input_files:list, device, n_events:int, filters=None, transfor
         Data  /dataset
         Label  /dataset
     """
-    def load_hd5_histogram(path:Path, n_events:int, filters):
+    def load_hd5_histogram(path:Path, n_events:int, filters=None):
         with h5py.File(path, 'r') as f:
             keys = list(f.keys())
-            keys = keys[0:n_events]
+            if len(keys) >= n_events:
+                keys = keys[0:n_events]
+            else:
+                print("Not enough events!")
+                exit()
             data = [f[key]["data"] for key in keys]
             #create array
             arr = np.array(data)
@@ -417,20 +437,29 @@ def store_hists_hdf5(images, savepath, filename, meta, cut=False):
         ST_cut = int(meta["ST_min"])
         N_cut = meta["N_min"]
 
-
     # Create a new HDF5 file
     if cut:
         path = Path(f"{savepath}/{filename}_res{res}_STmin{ST_cut}_Nmin{N_cut}_{n_events}_events.h5")
+        print(f"Removing {path}")
+        try:
+            os.remove(path)
+        except OSError:
+            pass
         file = h5py.File(path, "w")
     else:
         path = Path(f"{savepath}/{filename}_res{res}_{n_events}_events.h5")
+        print(f"Removing {path}")
+        try:
+            os.remove(path)
+        except OSError:
+            pass
         file = h5py.File(path, "w")
 
     # Create datasets in the file
     for i, image in enumerate(images):
         group = file.create_group(f"group_{i}")
         dataset = group.create_dataset(
-            "data", np.shape(image), h5py.h5t.IEEE_F32LE, data=image
+            "data", np.shape(image), data=image
         )
         labelset = group.create_dataset(
             "label", np.shape(filename), data=filename
@@ -439,5 +468,6 @@ def store_hists_hdf5(images, savepath, filename, meta, cut=False):
             "event_id", np.shape(eventid[i]), data=eventid[i]
         )
     file.close()
+    print(f"File saved as {path}")
     return path
 

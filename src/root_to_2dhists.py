@@ -5,6 +5,7 @@ import argparse
 import logging
 from datetime import datetime
 import sys
+import pickle 
 
 from imcal import *
 
@@ -55,14 +56,21 @@ else:
     sys.exit(1)
 
 #Load data
-clusters = load_data(data_path, MAX_EVENTS, "Tower", 
-                        ["Tower.ET", "Tower.Eta", "Tower.Phi", "Tower.Eem", "Tower.Ehad", "Tower.E"])
-tracks = load_data(data_path, MAX_EVENTS, "Track", 
-                        ["Track.PT", "Track.Eta", "Track.Phi"])
+clusters = load_data(data_path, "Tower", 
+                        ["Tower.ET", "Tower.Eta", "Tower.Phi", "Tower.Eem", "Tower.Ehad"],
+                        MAX_EVENTS)
+tracks = load_data(data_path, "Track", 
+                        ["Track.PT", "Track.Eta", "Track.Phi"], MAX_EVENTS)
 
-eventid = load_data(data_path, MAX_EVENTS, "Event", ["Event.Number"])
+eventid = load_data(data_path, "Event", ["Event.Number"], MAX_EVENTS)
 
 logging.info(f"Number of events loaded: {len(clusters)}")
+
+#Stop process if there are not enough events
+if len(clusters) < MAX_EVENTS:
+    print("Number of events specified by user exceeds number of available events.")
+    logging.error("Number of events specified by user exceeds number of available events.")
+    sys.exit()
 
 #Pad Tower data
 max_hits = np.max([len(event) for event in clusters["Eta"]])
@@ -96,4 +104,5 @@ meta = {
 
 #Save
 saved = store_hists_hdf5(images, savepath, filename, meta)
+
 logging.info(f"File saved as: {saved}")
