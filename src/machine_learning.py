@@ -80,7 +80,7 @@ def shuffle_predict(net, testdata, num_classes, size:int, res:int, device, retur
             values[i] = torch.softmax(outputs,dim=-1)
             losses[i] = F.cross_entropy(outputs, torch.argmax(y,dim=-1).to(device)) 
             prediction[i] = torch.argmax(outputs, dim=-1)
-            truth[i] = torch.argmax(y, dim=-1)
+            truth[i] = torch.argmax(y,dim=-1)
             i = i+1
 
     if return_loss and not return_values:

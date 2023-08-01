@@ -172,7 +172,6 @@ class Hdf5Dataset(Dataset):
                 idx = i	
         if idx==None:
             print(f"{value}, not in {labels}")
-
         vector = np.zeros(len(labels))
         vector[idx] = 1
         #Outputs a tensor
