@@ -105,7 +105,7 @@ class Hdf5Dataset(Dataset):
                     max_events = len(fd.keys())
                     if event_limit > max_events:
                         print(f"Number of events requested are greater than number of events in file: {max_events}.")
-                        exit()
+                        sys.exit()
                     else: 
                         n_events = event_limit
                     print(f"Selecting {n_events} events out of {max_events}.")
@@ -385,7 +385,7 @@ def load_datasets(input_files:list, device, n_events:int, filters=None, transfor
                 keys = keys[0:n_events]
             else:
                 print("Not enough events!")
-                exit()
+                sys.exit()
             data = [f[key]["data"] for key in keys]
             #create array
             arr = np.array(data)

@@ -43,7 +43,7 @@ logging.info(f"//{datetime.now()}//")
 logging.info(f"Reading file {args.file}")
 
 #set global variables
-MAX_EVENTS = args.N #images to make
+N_EVENTS = args.N #images to make
 savepath = args.savepath
 filename = args.name
 data_path = f"{args.file}:Delphes" 
@@ -76,7 +76,7 @@ def cut_pt_eta_met(array, pt_min, eta_max):
     return array
 
 def calculate_ST(jets, muons, electrons, photons, met):
-    ST = np.zeros(MAX_EVENTS)
+    ST = np.zeros(N_EVENTS)
     jet_sum = np.sum(jets.PT, axis=-1)/1000
     muon_sum = np.sum(muons.PT, axis=-1)/1000
     electron_sum = np.sum(electrons.PT, axis=-1)/1000
@@ -109,6 +109,9 @@ photons = load_data(data_path, "Photon",
 
 eventid = load_data(data_path, "Event", ["Event.Number"])
 
+logging.info(f"Number of events loaded: {len(clusters)}")
+
+#Calculate N and ST
 jets, n_jets = cut_pt_eta(jets, min_pt, max_eta)
 electrons, n_electrons = cut_pt_eta(electrons, min_pt, max_eta)
 muons, n_muons = cut_pt_eta(muons, min_pt, max_eta)
@@ -128,11 +131,10 @@ tracks = tracks[cut_idx]
 eventid = eventid[cut_idx]
 CUT_EVENTS = len(clusters)
 
-logging.info(f"Number of events loaded: {MAX_EVENTS}")
 logging.info(f"Number of events after cut: {CUT_EVENTS}")
 
 #Stop process if there are not enough events
-if CUT_EVENTS < MAX_EVENTS:
+if CUT_EVENTS < N_EVENTS:
     print("Number of events after cut does not match number of events specified by user.")
     logging.error("Number of events after cut does not match number of events specified by user.")
     sys.exit()
@@ -149,11 +151,11 @@ tracks = ak.pad_none(tracks, max_hits, axis=-1)
 
 # Creating the histograms
 hists_Eem = create_histograms(ak.to_numpy(clusters.Phi), ak.to_numpy(clusters.Eta), 
-                                ak.to_numpy(clusters.Eem), MAX_EVENTS, RESOLUTION)
+                                ak.to_numpy(clusters.Eem), N_EVENTS, RESOLUTION)
 hists_Ehad = create_histograms(ak.to_numpy(clusters.Phi), ak.to_numpy(clusters.Eta), 
-                                ak.to_numpy(clusters.Ehad), MAX_EVENTS, RESOLUTION)
+                                ak.to_numpy(clusters.Ehad), N_EVENTS, RESOLUTION)
 hists_tracks = create_histograms(ak.to_numpy(tracks.Phi), ak.to_numpy(tracks.Eta), 
-                                    ak.to_numpy(tracks.PT), MAX_EVENTS, RESOLUTION)
+                                    ak.to_numpy(tracks.PT), N_EVENTS, RESOLUTION)
 
 #Stack to 3 channel
 images = np.stack((hists_Eem, hists_Ehad, hists_tracks), axis=-1)
@@ -162,7 +164,7 @@ logging.info(f"Image data shape: {images.shape}")
 # Create meta data
 meta = {
     "Resolution": RESOLUTION,
-    "Events" : MAX_EVENTS,
+    "Events" : N_EVENTS,
     "Input" : data_path,
     "ST_min" : ST_min,
     "N_min" : N_min,
