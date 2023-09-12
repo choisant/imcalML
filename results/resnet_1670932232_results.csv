@@ -1,5 +1,0 @@
-,n,resolution,training samples,epochs,learning rate,transforms,filters,mean accuracy,std accuracy
-0,5,50,20000,30,0.0001,"Sequential(
-  (0): RandomVerticalFlip(p=0.5)
-  (1): RandomRoll()
-)",,0.907,0.006792152334373349
