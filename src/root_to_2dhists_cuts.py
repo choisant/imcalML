@@ -9,10 +9,10 @@ import sys
 from imcal import *
 
 """
-This script takes in 3-5 arguments (input root file location, where to save the new file, filename, resolution and number of events) and
-outputs a .hdf5 file and a log file. The root file must be made using Delphes, and contain calorimeter and track information. The script 
-can be changed to work with different root files.
-The created hdf5 file has the two datasets, "image" and "labels" which can be used for machine learning purpose.
+This script takes in 3-7 arguments (input root file location, where to save the new file, filename, resolution, number of events
+and two cut variables ST_min and N_min) and outputs a .hdf5 file and a log file. The root file must be made using Delphes, and 
+contain calorimeter and track information. The script can be changed to work with different root files.
+The created hdf5 file has the three datasets, "image", "labels" and "event_id" which can be used for machine learning purpose.
 Each image has the resolution set in this script, and the label given by the filename. The functions used in the script can be found in
 the imcal.py script in the same folder as this script. Eta(phi) is along x(y)-axis of the created histogram when viewed using the 
 matplotlib imshow function.
@@ -63,14 +63,12 @@ else:
 
 #Functions
 def cut_pt_eta(array, pt_min, eta_max):
-    array = ak.pad_none(array, 1, axis=-1)
     array = array[array.PT > pt_min]
     array = array[abs(array.Eta) < eta_max]
     n = np.array([len(event) for event in array.PT])
     return array, n
 
 def cut_pt_eta_met(array, pt_min, eta_max):
-    array = ak.pad_none(array, 1, axis=-1)
     array = array[array.MET > pt_min]
     array = array[abs(array.Eta) < eta_max]
     return array
@@ -120,8 +118,8 @@ met = cut_pt_eta_met(met, min_pt, max_eta)
 
 ST = calculate_ST(jets, muons, electrons, photons, met)
 N = np.array(n_jets) + np.array(n_electrons) + np.array(n_muons) + np.array(n_photons)
-ST_idx = np.nonzero(ST > ST_min)
-N_idx = np.nonzero(N > N_min)
+ST_idx = np.nonzero(ST >= ST_min)
+N_idx = np.nonzero(N >= N_min)
 cut_idx = np.intersect1d(ST_idx, N_idx)
 
 #Apply cut
