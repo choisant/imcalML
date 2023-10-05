@@ -6,9 +6,6 @@ import pandas as pd
 import seaborn as sn
 
 #other libraries
-from tqdm import tqdm
-import time
-import random
 import os
 import sys
 from pathlib import Path
@@ -22,12 +19,6 @@ from sklearn.metrics import confusion_matrix
 
 #torch specific
 import torch
-import torchvision as torchv
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.utils.data import DataLoader
-from torch.utils.data import Dataset
 from torch import Tensor
 from torch.utils import data
 
@@ -54,7 +45,21 @@ class CalorimeterDataset(data.Dataset):
             image = self.transform(image)
         return image, label
 
-class Hdf5Dataset(Dataset):
+class Hdf5Dataset(data.Dataset):
+    """
+    A class based on torch.utils.data.Dataset class.
+    The hdf5 file must be structured as such:
+    Event1 /group
+        Data:torch.Tensor /dataset
+        Label:str  /dataset
+        event_id:int /dataset
+    Event2 /group
+        Data:torch.Tensor /dataset
+        Label:str  /dataset
+        event_id:int /dataset
+    ....
+
+    """
     def __init__(
 		self,
 		filepaths: Union[Path,str],
@@ -75,7 +80,9 @@ class Hdf5Dataset(Dataset):
 			shuffle (bool): Randomize order of events. Always enable for training, 
 				otherwise all batches will contain a single class only. Optionally enable
 				shuffling in DataLoader
-			transform (Callable, optional): Function for data transforms
+			filters (list[str], optional): a list of filters
+            max_value (int, optional): Sets the saturation limit in the saturation filter.
+            transform (Callable, optional): Function for data transforms
 			event_limit (int, optional): Limit number of events in dataset. Clips the file from the start. 
 		"""
         super().__init__()
@@ -209,7 +216,10 @@ class RandomRoll(torch.nn.Module):
 Data processing
 """
 
-def apply_filters(key_list, image, maxvalue=2000):
+def apply_filters(key_list:list, image, maxvalue:float=2000):
+    """
+    Applies filters to the images.
+    """
     if key_list!=None:
         for key in key_list:
             if key=="saturate":
@@ -225,7 +235,9 @@ def apply_filters(key_list, image, maxvalue=2000):
     return image
 
 def label_maker(n_classes:int, n_events:int):
-    #Creates labels for the classes. The first class gets value [1, 0, .., 0], the next [0, 1, ..., 0] etc
+    """
+    Creates labels for the classes. The first class gets value [1, 0, .., 0], the next [0, 1, ..., 0] etc
+    """
     a = torch.zeros(n_events*n_classes, n_classes, dtype=torch.int)
     for i in range(n_classes):
         for j in range(n_events):
@@ -236,8 +248,10 @@ def label_maker(n_classes:int, n_events:int):
 Visualisation
 """
 
-def view_data(data, cols, num_classes:int, labels, res,spread):
-    
+def view_data(data:torch.Tensor, cols:int, num_classes:int, labels:list, res:int, spread:int):
+    """
+    Displays the calorimeter images.
+    """
     def matrix_image_plot(ax, label):
         ax.set_ylabel(r"$\phi$ [radians]]", fontsize=12)
         ax.set_xlabel(r"$\eta$", fontsize=12)
@@ -283,7 +297,7 @@ def cal_image_plot(ax):
 
 def cal_image_plot_paper(ax):
     """
-    Formating of calorimeter image
+    Formating of calorimeter image for the paper
     """
     ax.set_ylabel(r"$\phi$ [radians]", fontsize=24)
     ax.set_xlabel(r"$\eta$", fontsize=24)
@@ -291,7 +305,7 @@ def cal_image_plot_paper(ax):
     ax.tick_params(which="both", direction="out", bottom=True, left=True, labelsize=20, pad=15, length=6, width=3)
     ax.minorticks_on()
 
-def plot_conf_matrix(confusion, accuracy, labels):
+def plot_conf_matrix(confusion:pd.DataFrame, accuracy:pd.DataFrame, labels:list):
     """
     plot confusion matrix
     """
@@ -339,7 +353,7 @@ Data loading
 
 def load_data(rootfile:str, branch:str, keys:list, n_events:int=-1):
     """
-    Loads the data as awkward array. Opens the file and extracts the data before closing it again.
+    Loads root data as awkward array. Opens the root file and extracts the data before closing it again.
     """
     with uproot.open(rootfile) as file:
         valid_list = [key in file.keys() for key in keys]
@@ -355,7 +369,10 @@ def load_data(rootfile:str, branch:str, keys:list, n_events:int=-1):
             print(keys[not(valid_list)], " not present in data.")
 
 
-def load_hd5_histogram(path:Path, n_events:int, filters):
+def load_hd5_histogram(path:Path, n_events:int, filters:list=None):
+    """
+    Loads the hdf5 histograms from a .hdf5 file.
+    """
     with h5py.File(path) as f:
         print (f.keys())
         data = f["images"][0:n_events]
@@ -368,7 +385,7 @@ def load_hd5_histogram(path:Path, n_events:int, filters):
         return Tensor(arr)
 
 
-def load_datasets(input_files:list, device, n_events:int, filters=None, transforms=None):
+def load_datasets(input_files:list, device, n_events:int, filters:list=None, transforms=None):
     """ 
     Dataset must be in hdf5 format:
     Event1 /group
@@ -421,12 +438,13 @@ def load_datasets(input_files:list, device, n_events:int, filters=None, transfor
 Data storing
 """
 
-def store_hists_hdf5(images, savepath, filename, meta, cut=False):
+def store_hists_hdf5(images:np.array, savepath:str, filename:str, meta:dict, cut=False):
     """ Stores an array of images to HDF5.
         Parameters:
         ---------------
         images       images array, (MAX_EVENTS, RESOLUTION, RESOLUTION, 3) to be stored
         labels       labels array, (MAX_EVENTS, 1) to be stored
+        event_id     integers, array (MAX_EVENTS, 1) to be stored
     """
     n_events = meta["Events"]
     res = meta["Resolution"]

@@ -11,6 +11,9 @@ from torch import Tensor
 
 #This code is heavily inspired by/copied from this tutorial; https://pythonprogramming.net/introduction-deep-learning-neural-network-pytorch/
 def fwd_pass(net, X:Tensor, y:Tensor, res:int, device, optimizer, scheduler, train=False):
+    """
+    This function controls the machine learning steps, depending on if we are in training mode or not.
+    """
     if train:
         net.train()
         net.zero_grad()
@@ -25,6 +28,9 @@ def fwd_pass(net, X:Tensor, y:Tensor, res:int, device, optimizer, scheduler, tra
     return acc, loss
 
 def test(net, data, res:int, device, optimizer, scheduler, size:int = 32):
+    """
+    Calculates the accuracy and the loss of the model for a random batch.
+    """
     net.eval()
     dataset = DataLoader(data, size, shuffle=True) #shuffle data and choose batch size
     X, y = next(iter(dataset)) #get a random batch
@@ -32,7 +38,12 @@ def test(net, data, res:int, device, optimizer, scheduler, size:int = 32):
     return val_acc, val_loss
     
 def predict(net, testdata, num_classes, size:int, res:int, device, return_loss=False, return_values=False):
-    #Returns the predictions (as class number values)
+    """
+    Calculates the accuracy and the loss of the model in testing mode.
+    If return_loss is True, it will return the loss for each datapoint.
+    It can also return the softmax values of the raw output from the model.
+    Does not shuffle the data.
+    """
     dataset = DataLoader(testdata, size, shuffle=False) #shuffle data and choose batch size
     prediction = torch.zeros((len(dataset), size))
     truth = torch.zeros((len(dataset), size))
@@ -65,7 +76,12 @@ def predict(net, testdata, num_classes, size:int, res:int, device, return_loss=F
 
 
 def shuffle_predict(net, testdata, num_classes, size:int, res:int, device, return_loss=False, return_values=False):
-    #Returns the predictions (as class number values)
+    """
+    Calculates the accuracy and the loss of the model in testing mode.
+    If return_loss is True, it will return the loss for each datapoint.
+    It can also return the softmax values of the raw output from the model.
+    Shuffles the data.
+    """
     dataset = DataLoader(testdata, size, shuffle=True) #shuffle data and choose batch size
     prediction = torch.zeros((len(dataset), size))
     truth = torch.zeros((len(dataset), size))
@@ -93,6 +109,10 @@ def shuffle_predict(net, testdata, num_classes, size:int, res:int, device, retur
         return torch.flatten(truth), torch.flatten(prediction)
 
 def train(net, traindata, testdata, size:int, epochs:int, res:int, device, optimizer, scheduler):
+    """
+    Trains the model for the number of epochs specified, using the batch size specified.
+    Returns a dataframe with the stats from the training.
+    """
     dataset = DataLoader(traindata, size, shuffle=True)
     df_labels = ["Loss", "Accuracy", "Validation loss", "Validation accuracy", "Epoch", "Iteration"]
     df_data = [[0], [0], [0], [0], [0], [0]]
