@@ -15,6 +15,7 @@ from datetime import datetime
 from pathlib import Path
 from sklearn.metrics import accuracy_score
 import argparse
+from tqdm import tqdm
 
 #project specific
 from imcal import *
@@ -34,7 +35,8 @@ SAVE_PATH = args.savepath
 
 #variables controlled by the user. Change these to fit your specific needs.
 TRAIN_N_EVENTS = 10000 #Number of events to process for each class. If higher than the available number of events an exception will be raised.
-TEST_N_EVENTS = 3000 #Number of events to process for each class. If higher than the available number of events an exception will be raised.
+VAL_N_EVENTS = 3000
+TEST_N_EVENTS = 15000 #Number of events to process for each class. If higher than the available number of events an exception will be raised.
 RES = 50 #resolution
 
 #Data specification
@@ -47,14 +49,18 @@ CUT=True
 #Set data paths
 if CUT:
     N_EVENTS = 10000
-    TRAIN_FILENAMES = [f"{label}_res{RES}_STmin7_Nmin5_{N_EVENTS}_events.h5" for label in LABELS]
-    TEST_FILENAMES = [f"{label}_res{RES}_STmin7_Nmin5_3000_events.h5" for label in TEST_LABELS]
+    TRAIN_FILENAMES = [f"{label}_res{RES}_STmin7_Nmin5_{TRAIN_N_EVENTS}_events.h5" for label in LABELS]
+    VAL_FILENAMES = [f"{label}_res{RES}_STmin7_Nmin5_{VAL_N_EVENTS}_events.h5" for label in TEST_LABELS]
+    TEST_FILENAMES = [f"{label}_res{RES}_STmin7_Nmin5_{TEST_N_EVENTS}_events.h5" for label in TEST_LABELS]
 else:
     N_EVENTS = 10000
-    TRAIN_FILENAMES = [f"{label}_res{RES}_{N_EVENTS}_events.h5" for label in LABELS]
-    TEST_FILENAMES = [f"{label}_res{RES}_3000_events.h5" for label in TEST_LABELS]
+    TRAIN_FILENAMES = [f"{label}_res{RES}_{TRAIN_N_EVENTS}_events.h5" for label in LABELS]
+    VAL_FILENAMES = [f"{label}_res{RES}_{VAL_N_EVENTS}_events.h5" for label in TEST_LABELS]
+    TEST_FILENAMES = [f"{label}_res{RES}_{TEST_N_EVENTS}_events.h5" for label in TEST_LABELS]
+
 TRAIN_DATAPATHS = [f"/disk/atlas3/data_MC/2dhistograms/{FOLDERS[i]}/{RES}/{TRAIN_FILENAMES[i]}" for i in range(CLASSES)]
 TEST_DATAPATHS = [f"/disk/atlas3/data_MC/2dhistograms/{FOLDERS[i]}/{RES}/{TEST_FILENAMES[i]}" for i in range(CLASSES)]
+VAL_DATAPATHS = [f"/disk/atlas3/data_MC/2dhistograms/{FOLDERS[i]}/{RES}/{VAL_FILENAMES[i]}" for i in range(CLASSES)]
 
 #Set a unique name for the experiment
 labelstring = '_'.join([str(elem) for elem in PLOT_LABELS])
@@ -64,10 +70,12 @@ else: EXPERIMENT_NAME = f"experiment_resnet_{str(int(time.time()))}_{labelstring
 
 #Set up logging
 logging.basicConfig(filename=f"{SAVE_PATH}/{EXPERIMENT_NAME}.log", level=logging.INFO)
+logging.info(f"Experiment started: {datetime.now()}")
 logging.info(f"Running experiment with labels {LABELS}")
-logging.info(f"Number of training events: {TRAIN_N_EVENTS}, number of testing events: {TEST_N_EVENTS}")
+logging.info(f"Number of training events: {TRAIN_N_EVENTS}")
+logging.info(f"Number of validation events: {VAL_N_EVENTS}")
+logging.info(f"Number of testing events: {TEST_N_EVENTS}")
 logging.info(f"Number of experiments to run: {N_EXPERIMENTS}")
-logging.info(f"//{datetime.now()}//")
 
 logging.info(EXPERIMENT_NAME)
 
@@ -90,8 +98,11 @@ else:
     logging.info("Running on the CPU")
 
 #Load test data once
+valpaths = [Path(path) for path in VAL_DATAPATHS]
 testpaths = [Path(path) for path in TEST_DATAPATHS]
 
+val_data = Hdf5Dataset(testpaths, TEST_LABELS, DEVICE, 
+                        shuffle=False, filters=filters, transform=None, event_limit=VAL_N_EVENTS)
 test_data = Hdf5Dataset(testpaths, TEST_LABELS, DEVICE, 
                         shuffle=False, filters=filters, transform=None, event_limit=TEST_N_EVENTS)
 
@@ -100,21 +111,24 @@ df_labels = ["n", "resolution", "training samples", "epochs", "learning rate", "
 results = pd.DataFrame(columns=df_labels)
 
 #Function for running experiment
-def experiment(df, testdata, n_train, n, epochs, lr, transforms):
+def experiment(df, valdata, testdata, n_train, n, epochs, lr, transforms):
     scores = np.zeros(n)
     trainpaths = [Path(path) for path in TRAIN_DATAPATHS]
     traindata = load_datasets(trainpaths, DEVICE, n_train, filters, transforms)
-    for i in range(n):
+    for i in tqdm(range(n)):
+        t0 = time.time()
         logging.info(f"Iteration {i}")
         resnet = ResNet18(img_channels=3, num_classes=CLASSES)
         resnet.to(DEVICE)
         optimizer = optim.Adam(resnet.parameters(), lr=lr)
         scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr, max_lr=lr*10, step_size_up=5, mode="exp_range", gamma=0.85, cycle_momentum=False)
-        training_results = train(resnet, traindata, testdata, 2**8, epochs, RES, DEVICE, optimizer, scheduler)
+        training_results = train(resnet, traindata, valdata, 2**8, epochs, RES, DEVICE, optimizer, scheduler)
         truth, preds = predict(resnet, testdata, CLASSES, 1, RES, DEVICE)
         accuracy = accuracy_score(truth, preds, normalize=True)
         scores[i]= accuracy
         logging.info(f"Accuracy: {accuracy}")
+        t1 = time.time()
+        logging.info(f"Time elapsed: {int(t1-t0)} seconds: {int(t1-t0)/60} min.")
     data = {"n":n, 
             "resolution": RES,
             "training samples": len(traindata), 
@@ -128,9 +142,10 @@ def experiment(df, testdata, n_train, n, epochs, lr, transforms):
     new_df = pd.concat([df, new_data], ignore_index=True)
     return new_df, training_results, resnet
 
-results, training_results, resnet = experiment(df=results, testdata=test_data, n_train=TRAIN_N_EVENTS,
+results, training_results, resnet = experiment(df=results, valdata=val_data, testdata=test_data, n_train=TRAIN_N_EVENTS,
                                                 n=N_EXPERIMENTS, epochs=40, lr=0.001, transforms=transforms)
 
 results_string = results.to_string()
 logging.info(results_string)
+logging.info(f"Experiment ended {datetime.now()}")
 results.to_csv(f"{SAVE_PATH}/{EXPERIMENT_NAME}_results.csv")
