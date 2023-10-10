@@ -61,27 +61,6 @@ else:
     logging.critical("Invalid resolution format.")
     sys.exit(1)
 
-#Functions
-def cut_pt_eta(array, pt_min, eta_max):
-    array = array[array.PT > pt_min]
-    array = array[abs(array.Eta) < eta_max]
-    n = np.array([len(event) for event in array.PT])
-    return array, n
-
-def cut_pt_eta_met(array, pt_min, eta_max):
-    array = array[array.MET > pt_min]
-    array = array[abs(array.Eta) < eta_max]
-    return array
-
-def calculate_ST(jets, muons, electrons, photons, met):
-    ST = np.zeros(N_EVENTS)
-    jet_sum = np.sum(jets.PT, axis=-1)/1000
-    muon_sum = np.sum(muons.PT, axis=-1)/1000
-    electron_sum = np.sum(electrons.PT, axis=-1)/1000
-    photon_sum = np.sum(photons.PT, axis=-1)/1000
-    met_sum = np.sum(met.MET, axis=-1)/1000
-    ST = jet_sum + muon_sum + electron_sum + photon_sum + met_sum
-    return ST
 
 #Load data
 clusters = load_data(data_path, "Tower", 
