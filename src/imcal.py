@@ -220,13 +220,14 @@ def apply_filters(key_list:list, image, maxvalue:float=2000):
     """
     Applies filters to the images.
     """
-    if key_list!=None:
+    if key_list[0] != None:
         for key in key_list:
             if key=="saturate":
                 image[image>maxvalue] = maxvalue
             
             #normalisation should probably always be last applied filter
             elif key=="normalise":
+                image[image>maxvalue] = maxvalue
                 image = (image/maxvalue)
             
             else:
