@@ -66,7 +66,7 @@ class Hdf5Dataset(data.Dataset):
 		labels: list[str],
         device: torch.device,
 		shuffle: bool = True,
-		filters: Optional[list[str]] = None,
+		filters: Optional[list[str]] = [None],
         max_value: Optional[list[str]] = 5000,
 		transform: Optional[Callable] = None,
         event_limit: Optional[int] = None
@@ -230,6 +230,11 @@ def apply_filters(key_list:list, image, maxvalue:float=2000):
                 image[image>maxvalue] = maxvalue
                 image = (image/maxvalue)
             
+            elif key=="kazuki":
+                max_hits = torch.Tensor([torch.max(image[:,:,i]) for i in range(0,3)])
+                norm_image = (image/max_hits)*1000
+                image = torch.arctan(torch.log(norm_image/10)/torch.pi) + 0.5
+
             else:
                 print(f"Cannot find {key} filter.")
 
