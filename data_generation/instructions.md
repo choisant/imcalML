@@ -44,6 +44,7 @@ The detector is simulated using the fast simulaton tool [Delphes](https://cp3.ir
 ./DelphesHepMC2 ./cards/delphes_card_ATLAS.tcl /path/to/storage/folder/BH_n5_M8_10000events.root  ../HerwigBuilds/BlackMax/BH_n5_M8/BH_n5_M8.hepmc
 ```
 
-## Other more normal event types
-
-ROOT files can be generated using either Herwig7 + Delphes or Pythia + Delphes. There are many nice tutorials available.
+## Cuts
+Cuts are made to suppress standard model background. The cuts are based on [this paper:](https://arxiv.org/abs/1805.06013).
+We make the cut slightly more restrictive by requiring a signal object to be defined as a jet or lepton with p_T > 70 GeV and eta < 2.4. Each event is required to have 5 or more signal objects and the sum of transverse energy from all signal objects plus the missing transverse energy (ST) must be greater than or equal to 7 TeV.
+The cuts are performed after detector simulation.

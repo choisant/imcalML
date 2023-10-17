@@ -230,10 +230,9 @@ def apply_filters(key_list:list, image, maxvalue:float=2000):
                 image[image>maxvalue] = maxvalue
                 image = (image/maxvalue)
             
-            elif key=="kazuki":
-                max_hits = torch.Tensor([torch.max(image[:,:,i]) for i in range(0,3)])
-                norm_image = (image/max_hits)*1000
-                image = torch.arctan(torch.log(norm_image/10)/torch.pi) + 0.5
+            elif key=="paper":
+                image[:,:,2] = 4*image[:,:,2]
+                image = torch.arctan(torch.log(image/10))/torch.pi + 0.5
 
             else:
                 print(f"Cannot find {key} filter.")
@@ -289,19 +288,15 @@ def view_data(data:torch.Tensor, cols:int, num_classes:int, labels:list, res:int
         ax.minorticks_on()
     images = np.zeros((num_classes, cols, res, res, 3))
     labels = [[labels[i]]*cols for i in range(num_classes)]
-    print(labels)
     k = [[i]*cols for i in range(num_classes)]
-    print(k)
     for i in range(len(k)):
         row = k[i]
         row = [item*(spread) for item in row]
         row = [int(item + np.random.randint(1, high = 100)) for item in row]
         k[i] = row
-    print(k)
     for i, row in enumerate(k):
         for j, item in enumerate(row):
             images[i][j] = data[item][0].cpu()
-    print("Image shape: ", images[0][0].shape)
 
     fig, axs = plt.subplots(nrows = num_classes, ncols = cols, figsize = (cols*6, num_classes*6))
     for i in range (len(k)):
