@@ -1,5 +1,7 @@
 Efficiency for N >= 5 and ST >= 7:
 BH_n4_M8: 0.17
+BH_n2_M10: 0.55
 BH_n4_M10: 0.49
+BH_n6_M10: 0.43
 BH_n4_M12: 0.65
 SPH_9TeV: 0.18
