@@ -6,7 +6,7 @@ The software used in the data generation is typical HEP software and has complet
 
 ## Sphalerons
 
-To produce sphalerons we want to use the [instantons](https://gitlab.com/apapaefs/instantons) library add-on to the [Herwig7](https://herwig.hepforge.org/) event generator software. Generating these files require you to have a working installation of Herwig7, python 3 and a lot of patience. Instructions are unfortunately not available except on request (as of January 2023), but hopefully this will change.
+To produce sphalerons we want to use the [instantons](https://gitlab.com/apapaefs/instantons) library add-on to the [Herwig7](https://herwig.hepforge.org/) event generator software. Generating these files require you to have a working installation of Herwig7, python 3. Instructions are available on request (as of January 2023). The sphaleron Herwig7 input file used in this project is included in this folder.
 
 ## Black holes
 
@@ -33,13 +33,15 @@ Maxmum_mass(GeV)
 ```
 Running the program produces a Les Hauches Accord file (`BlackMaxLHArecord.lhe`). This file can be used as input to Herwig. Always produce a few hundred extra events, as some may not be accepted by Herwig and will result in an error if the requested number of events exceed the available number of viable events.
 
+In this study, the minimum mass was set to 8000, 10000 and 12000 and the number of extra dimensions to 2, 4 and 6.
+
 ### Hadronization
 
 The events are hadronized using Herwig7. If Herwig is working for production of sphalerons it should be fine to get it working for black holes as well. The `LHA_reader.in` file can be used as a template to see how to import a .lhe file, set the right PDF and save the output hepmc file (HepMC2!).
 
 ## Detector simulation
 
-The detector is simulated using the fast simulaton tool [Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes). Delphes should be installed using a newer gcc and python 3. Installation instructions can be found [here](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/QuickTour). The hepmc files produced in Herwig are of the older hepmc2 format. Navigate to the Delphes installation folder and run the simulation:
+The detector is simulated using the fast simulaton tool [Delphes](https://cp3.irmp.ucl.ac.be/projects/delphes). Delphes should be installed using a newer gcc and python 3. Installation instructions can be found [here](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/QuickTour). The hepmc files produced in Herwig are of the older hepmc2 format. The ATLAS card was used to simulate the ATLAS detector. Navigate to the Delphes installation folder and run the simulation:
 ```
 ./DelphesHepMC2 ./cards/delphes_card_ATLAS.tcl /path/to/storage/folder/BH_n5_M8_10000events.root  ../HerwigBuilds/BlackMax/BH_n5_M8/BH_n5_M8.hepmc
 ```
