@@ -89,6 +89,7 @@ For bigger projects it can be more convenient to work in a code editor like VSC.
 You can also connect to the jupyter notebook kernel on a remote server using the Remote-SSH Plugin in VSC. See this [tutorial](https://www.digitalocean.com/community/tutorials/how-to-use-visual-studio-code-for-remote-development-via-the-remote-ssh-plugin). This is definitely the way to go if you want to make an extensive project with several scripts as well as notebooks.
 
 ## ROOT files
+The location of files are hard coded and must of course be changed for the notebooks to run. Data is not provided with this project, but can be recreated.
 The files we use in this project are generated using Pythia/Herwig7/Delphes. The output is a ROOT file, which has a tree-like structure. All the available fields are described [here:](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription).
 The project also uses hdf5 files, made with the `/src/root_to_2dhists.py` script. These are datasets containing 3 channel images using the energy deposits in the tracking system and the two calorimeter systems of the detector, their label and the event ID for each event. More information on this can be found in `/src/imcal.py` The files are generated from the Delphes ROOT files. Instructions for how to generate ROOT files yourself can be found in the data_generation folder.
 
