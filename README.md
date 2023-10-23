@@ -104,7 +104,9 @@ python ./root_to_2dhists.py -f "/my/data/rootfiles/higgs.root" -s "/my/data/hist
 ```
 
 ## License
-This work is marked with CC0 1.0. To view a copy of this license, visit http://creativecommons.org/publicdomain/zero/1.0
+This work is marked with CC0 1.0. To view a copy of this license, visit [this page] (http://creativecommons.org/publicdomain/zero/1.0)
+Even with this license, we hope that if anyone uses this repository for their own work they will credit us: [Zenodo](https://zenodo.org/records/10033266)
+DOI 10.5281/zenodo.10033265
 
 ## Our research project
 
