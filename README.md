@@ -103,6 +103,9 @@ cd src
 python ./root_to_2dhists.py -f "/my/data/rootfiles/higgs.root" -s "/my/data/histograms/" -n "higgs" -r 50 -N 1000
 ```
 
+## License
+This work is marked with CC0 1.0. To view a copy of this license, visit http://creativecommons.org/publicdomain/zero/1.0
+
 ## Our research project
 
 This project is a collaboration between the Western Norway University of Applied Sciences, The University of Bergen and the University of Warsaw. The research project has the name "Understanding the Early Universe: interplay of theory and collider experiments". The aim of the project is to study phenomena that are crucial to understanding the evolution of the Universe, but unexplained by the current Particle Physic's paradigm: the Standard Model of Particle Physics.  More information can be found on the research project [website](https://www.fuw.edu.pl/~ksakurai/grieg/index.html?lang=en). It is funded by Norwegian Financial Mechanisms 2014-2021, grant no. 2019/34/H/ST2/00707 (GRIEG). The project is operated by the Polish National Science Centre.
