@@ -76,7 +76,7 @@ Notice the number *8889*. This is the port that the notebook is hosted on. If yo
 ```
 ssh -L 1234:localhost:8889 -y <username>@<server>
 ```
-Rembember to change out username and X with your own username and the server name. Type your password and press enter. Now you should be able to open your browser and paste in the second link from above, changing out the port number to the one you are using on your local machine.
+Remember to change out username and X with your own username and the server name. Type your password and press enter. Now you should be able to open your browser and paste in the second link from above, changing out the port number to the one you are using on your local machine.
 
 ```
 http://localhost:1234/?token=a18268c5f164e0dbe2e52aec3b0429ee20264ee6828a2802
@@ -84,14 +84,14 @@ http://localhost:1234/?token=a18268c5f164e0dbe2e52aec3b0429ee20264ee6828a2802
 If you did everything correctly you now have access to all the notebooks in your browser and can start working!
 ## Visual Studio Code
 
-For bigger projects it can be more convenient to work in a code editor like VSC. Make sure you set up the virtual environments correctly. Select the appropriate environment as your "Kernel" for the notebook.
+For bigger projects, it can be more convenient to work in a code editor like VSC. Make sure you set up the virtual environments correctly. Select the appropriate environment as your "Kernel" for the notebook.
 
 You can also connect to the jupyter notebook kernel on a remote server using the Remote-SSH Plugin in VSC. See this [tutorial](https://www.digitalocean.com/community/tutorials/how-to-use-visual-studio-code-for-remote-development-via-the-remote-ssh-plugin). This is definitely the way to go if you want to make an extensive project with several scripts as well as notebooks.
 
 ## ROOT files
-The location of files are hard coded and must of course be changed for the notebooks to run. Data is not provided with this project, but can be recreated.
+The location of files is hard coded and must of course be changed for the notebooks to run. Data is not provided with this project but can be recreated.
 The files we use in this project are generated using Pythia/Herwig7/Delphes. The output is a ROOT file, which has a tree-like structure. All the available fields are described [here:](https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription).
-The project also uses hdf5 files, made with the `/src/root_to_2dhists.py` script. These are datasets containing 3 channel images using the energy deposits in the tracking system and the two calorimeter systems of the detector, their label and the event ID for each event. More information on this can be found in `/src/imcal.py` The files are generated from the Delphes ROOT files. Instructions for how to generate ROOT files yourself can be found in the data_generation folder.
+The project also uses hdf5 files, made with the `/src/root_to_2dhists.py` script. These are datasets containing 3 channel images using the energy deposits in the tracking system and the two calorimeter systems of the detector, their label and the event ID for each event. More information on this can be found in `/src/imcal.py` The files are generated from the Delphes ROOT files. Instructions for how to generate ROOT files yourself can be found in the `data_generation` folder.
 
 ## Create histograms for image classification
 
@@ -104,7 +104,7 @@ python ./root_to_2dhists.py -f "/my/data/rootfiles/higgs.root" -s "/my/data/hist
 ```
 
 ## License
-This work is marked with CC0 1.0. To view a copy of this license, visit [this page] (http://creativecommons.org/publicdomain/zero/1.0)
+This work is marked with CC0 1.0. To view a copy of this license, visit [this page](http://creativecommons.org/publicdomain/zero/1.0)
 Even with this license, we hope that if anyone uses this repository for their own work they will credit us: [Zenodo](https://zenodo.org/records/10033266)
 DOI 10.5281/zenodo.10033265
 
@@ -112,6 +112,6 @@ DOI 10.5281/zenodo.10033265
 
 This project is a collaboration between the Western Norway University of Applied Sciences, The University of Bergen and the University of Warsaw. The research project has the name "Understanding the Early Universe: interplay of theory and collider experiments". The aim of the project is to study phenomena that are crucial to understanding the evolution of the Universe, but unexplained by the current Particle Physic's paradigm: the Standard Model of Particle Physics.  More information can be found on the research project [website](https://www.fuw.edu.pl/~ksakurai/grieg/index.html?lang=en). It is funded by Norwegian Financial Mechanisms 2014-2021, grant no. 2019/34/H/ST2/00707 (GRIEG). The project is operated by the Polish National Science Centre.
 
-You can read more about the HVL team at their website [learningdarkmatter.com/] (https://learningdarkmatter.com/).
+You can read more about the HVL team at their website [learningdarkmatter.com](https://learningdarkmatter.com/).
 
-Any inquires can be sent to the author of this GitHub project Aurora Grefsrud: agre@hvl.no
+Any inquiries can be sent to the author of this GitHub project Aurora Grefsrud: agre@hvl.no
