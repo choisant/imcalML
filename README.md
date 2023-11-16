@@ -1,5 +1,7 @@
 # imcalML repository
 
+Paper is out on arXiv!
+[https://arxiv.org/abs/2310.15227](https://arxiv.org/abs/2310.15227)
 ## Requirements
 
 Users should have a basic understanding of
