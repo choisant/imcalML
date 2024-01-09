@@ -1,0 +1,17 @@
+INFO:root:Experiment started: 2023-12-20 13:16:45.187371
+INFO:root:Running experiment with labels ['PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL', 'BH_n2_M10', 'BH_n4_M8', 'BH_n4_M10', 'BH_n4_M12', 'BH_n6_M10']
+INFO:root:Number of training events: 10000
+INFO:root:Number of validation events: 3000
+INFO:root:Number of testing events: 15000
+INFO:root:Number of experiments to run: 2
+INFO:root:experiment_resnet18_1703074605_SPH_9_BH_n2_M10_BH_n4_M8_BH_n4_M10_BH_n4_M12_BH_n6_M10_CUT
+INFO:root:Running on the GPU
+INFO:root:Iteration 0
+INFO:root:Accuracy: 0.5358666666666667
+INFO:root:Time elapsed: 69 seconds: 1.15 min.
+INFO:root:Iteration 1
+INFO:root:Accuracy: 0.5401111111111111
+INFO:root:Time elapsed: 67 seconds: 1.1166666666666667 min.
+INFO:root:   n resolution training samples epochs learning rate                                 transforms filters mean accuracy std accuracy
+0  2         50            60000      5         0.001  [RandomVerticalFlip(p=0.5), RandomRoll()]    None      0.537989     0.002122
+INFO:root:Experiment ended 2023-12-20 13:20:20.877236

@@ -1,0 +1,5 @@
+,n,resolution,training samples,epochs,learning rate,transforms,filters,mean accuracy,std accuracy
+0,5,50,60000,30,0.001,"Sequential(
+  (0): RandomVerticalFlip(p=0.5)
+  (1): CircularPadding()
+)",,0.4122377777777778,0.018376663408374534

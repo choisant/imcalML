@@ -1,5 +1,7 @@
 import torch.nn as nn
+import torch
 #https://gist.github.com/Gedeon-m-gedus/84d6f5aa5fa0ecfb4dc2190e41d0661a
+    
 class Block(nn.Module):
     def __init__(self, num_layers, in_channels, out_channels, identity_downsample=None, stride=1):
         assert num_layers in [18, 34, 50, 101, 152], "should be a a valid architecture"
@@ -10,15 +12,15 @@ class Block(nn.Module):
         else:
             self.expansion = 1
         # ResNet50, 101, and 152 include additional layer of 1x1 kernels
-        self.conv1 = nn.Conv2d(in_channels, out_channels, padding_mode="circular", kernel_size=1, stride=1, padding=0)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, padding_mode="zeros", kernel_size=1, stride=1, padding=0)
         self.bn1 = nn.BatchNorm2d(out_channels)
         if self.num_layers > 34:
-            self.conv2 = nn.Conv2d(out_channels, out_channels, padding_mode="circular", kernel_size=3, stride=stride, padding=1)
+            self.conv2 = nn.Conv2d(out_channels, out_channels, padding_mode="zeros", kernel_size=3, stride=stride, padding=1)
         else:
             # for ResNet18 and 34, connect input directly to (3x3) kernel (skip first (1x1))
-            self.conv2 = nn.Conv2d(in_channels, out_channels, padding_mode="circular", kernel_size=3, stride=stride, padding=1)
+            self.conv2 = nn.Conv2d(in_channels, out_channels, padding_mode="zeros", kernel_size=3, stride=stride, padding=1)
         self.bn2 = nn.BatchNorm2d(out_channels)
-        self.conv3 = nn.Conv2d(out_channels, out_channels * self.expansion, padding_mode="circular", kernel_size=1, stride=1, padding=0)
+        self.conv3 = nn.Conv2d(out_channels, out_channels * self.expansion, padding_mode="zeros", kernel_size=1, stride=1, padding=0)
         self.bn3 = nn.BatchNorm2d(out_channels * self.expansion)
         self.relu = nn.ReLU()
         self.identity_downsample = identity_downsample
@@ -61,7 +63,7 @@ class ResNet(nn.Module):
         else:
             layers = [3, 8, 36, 3]
         self.in_channels = 64
-        self.conv1 = nn.Conv2d(image_channels, 64, kernel_size=7, padding_mode="circular", stride=2, padding=3)
+        self.conv1 = nn.Conv2d(image_channels, 64, kernel_size=7, padding_mode="zeros", stride=2, padding=3)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -95,7 +97,7 @@ class ResNet(nn.Module):
     def make_layers(self, num_layers, block, num_residual_blocks, intermediate_channels, stride):
         layers = []
 
-        identity_downsample = nn.Sequential(nn.Conv2d(self.in_channels, intermediate_channels*self.expansion, kernel_size=1, stride=stride),
+        identity_downsample = nn.Sequential(nn.Conv2d(self.in_channels, intermediate_channels*self.expansion, kernel_size=1, padding_mode="zeros", stride=stride),
                                             nn.BatchNorm2d(intermediate_channels*self.expansion))
         layers.append(block(num_layers, self.in_channels, intermediate_channels, identity_downsample, stride))
         self.in_channels = intermediate_channels * self.expansion # 256

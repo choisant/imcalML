@@ -212,6 +212,62 @@ class RandomRoll(torch.nn.Module):
         img = torch.roll(img, shift, roll_axis)
         return img
 
+class CircularPadding(torch.nn.Module):
+    """
+    Applies a circular (panoramic) padding to the image along a given axis.
+    """
+    def __init__(self, pad_len:int, pad_dim:int):
+        """
+        Args:
+
+        """
+        super().__init__()
+        assert isinstance(pad_len, int)
+        assert isinstance(pad_dim, int)
+        self.pad_len = pad_len
+        self.pad_dim = pad_dim
+        if pad_dim > 1:
+            print("Pads only along x or y-axis.")
+
+    def forward(self, img):
+        """
+        Args:
+            img (PIL Image or Tensor): Image to be  PADDED.
+
+        Returns:
+            PIL Image or Tensor: Padded image.
+        """
+        pad_len = self.pad_len
+        pad_dim = self.pad_dim
+        img = circular_padding(img, pad_len, pad_dim)
+        return img
+
+def circular_padding(image, pad_len:int, pad_dim:int):
+        #pads image on both sides in either x or y-direction (as seen by imshow)
+        y_dim = image.shape[0]
+        x_dim = image.shape[1]
+        channels = image.shape[-1]
+        if pad_dim==0:
+            new_image = torch.zeros((x_dim + 2*pad_len, y_dim, channels))
+            new_image[pad_len-1:-(pad_len+1), :, :] = image
+            #padding from opposite side
+            new_image[0:pad_len, :, :] = image[-(pad_len+1):-1, :, :]
+            new_image[-(pad_len+1):-1, :, :] = image[0:pad_len, :, :]
+            return new_image
+
+        elif pad_dim==1:
+            new_image = torch.zeros((x_dim, y_dim + 2*pad_len, channels))
+            new_image[:, pad_len-1:-(pad_len+1), :] = image
+            #padding from opposite side
+            new_image[:, 0:pad_len, :] = image[:, -(pad_len+1):-1, :]
+            new_image[:, -(pad_len+1):-1, :] = image[:, 0:pad_len, :]
+            return new_image
+
+        else:
+            print("pad direction should be x or y")
+            return image
+
+
 """
 Data processing
 """

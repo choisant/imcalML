@@ -20,6 +20,7 @@ from tqdm import tqdm
 #project specific
 from imcal import *
 from resnet import ResNet18
+from resnet import ResNet34
 from machine_learning import *
 
 #Parser
@@ -40,9 +41,9 @@ TEST_N_EVENTS = 15000 #Number of events to process for each class. If higher tha
 RES = 50 #resolution
 
 #Data specification
-LABELS = ["PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL", "BH_n2_M10", "BH_n4_M8", "BH_n4_M10", "BH_n4_M12", "BH_n6_M10"]
+LABELS = ["PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL", "BH_n4_M8", "BH_n2_M10", "BH_n4_M10", "BH_n6_M10", "BH_n4_M12"]
 TEST_LABELS = [f"{label}_test" for label in LABELS]
-PLOT_LABELS = ["SPH_9", "BH_n2_M10", "BH_n4_M8", "BH_n4_M10", "BH_n4_M12", "BH_n6_M10"]
+PLOT_LABELS = ["SPH_9", "BH_n4_M8", "BH_n2_M10", "BH_n4_M10", "BH_n6_M10", "BH_n4_M12"]
 CLASSES = len(LABELS) #The number of output nodes in the net, equal to the number of classes
 FOLDERS = ["sph", "BH", "BH", "BH", "BH", "BH"]
 CUT=True
@@ -65,8 +66,9 @@ VAL_DATAPATHS = [f"/disk/atlas3/data_MC/2dhistograms/{FOLDERS[i]}/{RES}/{VAL_FIL
 #Set a unique name for the experiment
 labelstring = '_'.join([str(elem) for elem in PLOT_LABELS])
 if CUT:
-    EXPERIMENT_NAME = f"experiment_resnet_{str(int(time.time()))}_{labelstring}_CUT"
-else: EXPERIMENT_NAME = f"experiment_resnet_{str(int(time.time()))}_{labelstring}"
+    EXPERIMENT_NAME = f"experiment_resnet18_{str(int(time.time()))}_{labelstring}_CUT"
+else: EXPERIMENT_NAME = f"experiment_resnet18_{str(int(time.time()))}_{labelstring}"
+Path(f"{SAVE_PATH}/models/{EXPERIMENT_NAME}/").mkdir(parents=True, exist_ok=True)
 
 #Set up logging
 logging.basicConfig(filename=f"{SAVE_PATH}/{EXPERIMENT_NAME}.log", level=logging.INFO)
@@ -80,13 +82,16 @@ logging.info(f"Number of experiments to run: {N_EXPERIMENTS}")
 logging.info(EXPERIMENT_NAME)
 
 #filters
-filters=None
+filters=[None]
 
 #transforms
+
 transforms = torch.nn.Sequential(
-        torchv.transforms.RandomVerticalFlip(),
-        RandomRoll(roll_axis=0)
+        torchv.transforms.RandomVerticalFlip()#,
+        #CircularPadding(20, 0)
+        #RandomRoll(roll_axis=0)
     )
+#transforms = None
 
 #cuda
 if torch.cuda.is_available():
@@ -101,10 +106,8 @@ else:
 valpaths = [Path(path) for path in VAL_DATAPATHS]
 testpaths = [Path(path) for path in TEST_DATAPATHS]
 
-val_data = Hdf5Dataset(testpaths, TEST_LABELS, DEVICE, 
-                        shuffle=False, filters=filters, transform=None, event_limit=VAL_N_EVENTS)
-test_data = Hdf5Dataset(testpaths, TEST_LABELS, DEVICE, 
-                        shuffle=False, filters=filters, transform=None, event_limit=TEST_N_EVENTS)
+val_data = load_datasets(valpaths, DEVICE, VAL_N_EVENTS, filters, transforms=None)
+test_data = load_datasets(testpaths, DEVICE, TEST_N_EVENTS, filters, transforms=None)
 
 #Set up dataframe
 df_labels = ["n", "resolution", "training samples", "epochs", "learning rate", "transforms", "filters", "mean accuracy", "std accuracy"]
@@ -118,17 +121,22 @@ def experiment(df, valdata, testdata, n_train, n, epochs, lr, transforms):
     for i in tqdm(range(n)):
         t0 = time.time()
         logging.info(f"Iteration {i}")
+        #Set a unique name for the experiment
+        if CUT:
+            MODEL_NAME = f"resnet18_{str(int(time.time()))}_{labelstring}_CUT"
+        else: MODEL_NAME = f"resnet18_{str(int(time.time()))}_{labelstring}"
         resnet = ResNet18(img_channels=3, num_classes=CLASSES)
         resnet.to(DEVICE)
         optimizer = optim.Adam(resnet.parameters(), lr=lr)
         scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr, max_lr=lr*10, step_size_up=5, mode="exp_range", gamma=0.85, cycle_momentum=False)
         training_results = train(resnet, traindata, valdata, 2**8, epochs, RES, DEVICE, optimizer, scheduler)
-        truth, preds = predict(resnet, testdata, CLASSES, 1, RES, DEVICE)
+        truth, preds = predict(resnet, testdata, CLASSES, 100, RES, DEVICE)
         accuracy = accuracy_score(truth, preds, normalize=True)
         scores[i]= accuracy
         logging.info(f"Accuracy: {accuracy}")
         t1 = time.time()
         logging.info(f"Time elapsed: {int(t1-t0)} seconds: {int(t1-t0)/60} min.")
+        torch.save(resnet.state_dict(), f"{SAVE_PATH}/models/{EXPERIMENT_NAME}/{MODEL_NAME}.pt")
     data = {"n":n, 
             "resolution": RES,
             "training samples": len(traindata), 
@@ -143,7 +151,7 @@ def experiment(df, valdata, testdata, n_train, n, epochs, lr, transforms):
     return new_df, training_results, resnet
 
 results, training_results, resnet = experiment(df=results, valdata=val_data, testdata=test_data, n_train=TRAIN_N_EVENTS,
-                                                n=N_EXPERIMENTS, epochs=40, lr=0.001, transforms=transforms)
+                                                n=N_EXPERIMENTS, epochs=30, lr=0.001, transforms=transforms)
 
 results_string = results.to_string()
 logging.info(results_string)

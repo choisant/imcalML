@@ -17,7 +17,9 @@ def fwd_pass(net, X:Tensor, y:Tensor, res:int, device, optimizer, scheduler, tra
     if train:
         net.train()
         net.zero_grad()
-    outputs = net(X.view(-1, 3, res, res).to(device))
+    #swap last axes, new config: channel, y, x
+    X = torch.swapaxes(X, -3, -1)
+    outputs = net(X.view(-1, 3, X.shape[-2], X.shape[-1]).to(device))
     matches = [torch.argmax(i) == torch.argmax(j) for i, j in zip(outputs, y)]
     acc = matches.count(True)/len(matches)
     loss = F.cross_entropy(outputs, torch.argmax(y,dim=-1).to(device)) 
@@ -56,7 +58,8 @@ def predict(net, testdata, num_classes, size:int, res:int, device, return_loss=F
     with torch.no_grad():
         for data in tqdm(dataset):
             X, y = data
-            outputs = net(X.view(-1, 3, res, res).to(device))
+            X = torch.swapaxes(X, -3, -1)
+            outputs = net(X.view(-1, 3, X.shape[-2], X.shape[-1]).to(device))
             if return_values:
                 values[i] = torch.softmax(outputs,dim=-1)
             if return_loss:
@@ -92,7 +95,8 @@ def shuffle_predict(net, testdata, num_classes, size:int, res:int, device, retur
     with torch.no_grad():
         for data in tqdm(dataset):
             X, y = data
-            outputs = net(X.view(-1, 3, res, res).to(device))
+            X = torch.swapaxes(X, -3, -1)
+            outputs = net(X.view(-1, 3, X.shape[-2], X.shape[-1]).to(device))
             values[i] = torch.softmax(outputs,dim=-1)
             losses[i] = F.cross_entropy(outputs, torch.argmax(y,dim=-1).to(device)) 
             prediction[i] = torch.argmax(outputs, dim=-1)
