@@ -33,7 +33,7 @@ bash Miniconda3-latest-Linux-x86_64.sh
 Now we need to create our virtual environments. For the notebooks which utilise lumin we should use python 3.6 and some specific package versions. We include the jupyter notebook package as well. Always remember to activate the environment at the start of a work session, and deactivate it afterwards.
 
 ```
-conda create -n imcal python=3.9 notebook
+conda create -n imcal python=3.10 notebook
 conda activate imcal
 ```
 
@@ -45,7 +45,6 @@ In this venv we can install any widely used packages we wish, as these should no
 * matplotlib
 * scikit
 * seaborn
-* fast-histograms
 * pytorch
 * torchvision
 * tqdm
