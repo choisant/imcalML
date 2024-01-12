@@ -1,0 +1,10 @@
+#python modules needed to run these scripts
+
+seaborn
+pandas
+numpy
+uproot
+h5py
+tqdm
+torch
+scikit-learn

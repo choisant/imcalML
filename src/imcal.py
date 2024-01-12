@@ -11,7 +11,6 @@ import sys
 from pathlib import Path
 import h5py
 import uproot
-from fast_histogram import histogram2d
 from random import shuffle as randomshuffle
 from pathlib import Path
 from typing import Optional, Callable, Union
