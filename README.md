@@ -1,6 +1,7 @@
 # imcalML repository
 
 Paper is out on arXiv!
+"Machine Learning Classification of Sphalerons and Black Holes at the LHC"
 [https://arxiv.org/abs/2310.15227](https://arxiv.org/abs/2310.15227)
 ## Requirements
 

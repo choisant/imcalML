@@ -271,7 +271,7 @@ def circular_padding(image, pad_len:int, pad_dim:int):
 Data processing
 """
 
-def apply_filters(key_list:list, image, maxvalue:float=2000):
+def apply_filters(key_list:list, image, maxvalue:float):
     """
     Applies filters to the images.
     """
@@ -283,6 +283,9 @@ def apply_filters(key_list:list, image, maxvalue:float=2000):
             #normalisation should probably always be last applied filter
             elif key=="normalise":
                 image[image>maxvalue] = maxvalue
+                image = (image/maxvalue)
+
+            elif key=="divide":
                 image = (image/maxvalue)
             
             elif key=="paper":
@@ -462,7 +465,7 @@ def load_hd5_histogram(path:Path, n_events:int, filters:list=None):
         return Tensor(arr)
 
 
-def load_datasets(input_files:list, device, n_events:int, filters:list=None, transforms=None):
+def load_datasets(input_files:list, device, n_events:int, filters:list=None, max_value:int=5000, transforms=None):
     """ 
     Dataset must be in hdf5 format:
     Event1 /group
@@ -486,7 +489,8 @@ def load_datasets(input_files:list, device, n_events:int, filters:list=None, tra
             print(f"Loaded data with {len(arr)} entries of shape {np.shape(arr)}.")
             print(f"Check max value: {np.max(arr)}.")
             #Filters (normalise etc)
-            arr = apply_filters(filters, arr, maxvalue=5000)
+            arr = apply_filters(filters, arr, max_value)
+            print(f"Check max value: {np.max(arr)}.")
             return Tensor(arr)
 
     def label_maker(n_classes:int, n_events:int):

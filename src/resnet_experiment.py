@@ -82,14 +82,14 @@ logging.info(f"Number of experiments to run: {N_EXPERIMENTS}")
 logging.info(EXPERIMENT_NAME)
 
 #filters
-filters=[None]
+filters=["divide"]
+MAX_VALUE = 200
 
 #transforms
 
 transforms = torch.nn.Sequential(
-        torchv.transforms.RandomVerticalFlip()#,
-        #CircularPadding(20, 0)
-        #RandomRoll(roll_axis=0)
+        torchv.transforms.RandomVerticalFlip(),
+        RandomRoll(roll_axis=0)
     )
 #transforms = None
 
@@ -106,18 +106,18 @@ else:
 valpaths = [Path(path) for path in VAL_DATAPATHS]
 testpaths = [Path(path) for path in TEST_DATAPATHS]
 
-val_data = load_datasets(valpaths, DEVICE, VAL_N_EVENTS, filters, transforms=None)
-test_data = load_datasets(testpaths, DEVICE, TEST_N_EVENTS, filters, transforms=None)
+val_data = load_datasets(valpaths, DEVICE, VAL_N_EVENTS, filters, max_value=MAX_VALUE, transforms=None)
+test_data = load_datasets(testpaths, DEVICE, TEST_N_EVENTS, filters, max_value=MAX_VALUE, transforms=None)
 
 #Set up dataframe
 df_labels = ["n", "resolution", "training samples", "epochs", "learning rate", "transforms", "filters", "mean accuracy", "std accuracy"]
 results = pd.DataFrame(columns=df_labels)
 
 #Function for running experiment
-def experiment(df, valdata, testdata, n_train, n, epochs, lr, transforms):
+def experiment(df, valdata, testdata, n_train, n, epochs, lr, transforms, filters):
     scores = np.zeros(n)
     trainpaths = [Path(path) for path in TRAIN_DATAPATHS]
-    traindata = load_datasets(trainpaths, DEVICE, n_train, filters, transforms)
+    traindata = load_datasets(trainpaths, DEVICE, n_train, filters, max_value=MAX_VALUE, transforms=transforms)
     for i in tqdm(range(n)):
         t0 = time.time()
         logging.info(f"Iteration {i}")
@@ -151,7 +151,7 @@ def experiment(df, valdata, testdata, n_train, n, epochs, lr, transforms):
     return new_df, training_results, resnet
 
 results, training_results, resnet = experiment(df=results, valdata=val_data, testdata=test_data, n_train=TRAIN_N_EVENTS,
-                                                n=N_EXPERIMENTS, epochs=30, lr=0.001, transforms=transforms)
+                                                n=N_EXPERIMENTS, epochs=30, lr=0.001, transforms=transforms, filters=filters)
 
 results_string = results.to_string()
 logging.info(results_string)

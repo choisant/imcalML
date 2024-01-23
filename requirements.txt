@@ -1,10 +1,16 @@
-#python modules needed to run these scripts
+#Python modules used in the creation of the paper
+#"Machine Learning Classification of Sphalerons and Black Holes at the LHC"
 
-seaborn
-pandas
-numpy
-uproot
-h5py
-tqdm
-torch
-scikit-learn
+seaborn==0.13.1
+scipy==1.11.4
+pandas==2.1.4
+numpy==1.26.3
+uproot==5.2.1
+h5py==3.10.0
+tqdm==2.1.2
+torch==2.1.2
+torchaudio==2.1.2 
+torchvision==0.16.2  
+scikit-learn==1.3.2
+awkward==2.5.1
+tqdm==4.66.1
