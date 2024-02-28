@@ -39,7 +39,7 @@ def test(net, data, res:int, device, optimizer, scheduler, size:int = 32):
     val_acc, val_loss = fwd_pass(net, X, y, res, device, optimizer, scheduler, train=False)
     return val_acc, val_loss
     
-def predict(net, testdata, num_classes, size:int, res:int, device, return_loss=False, return_values=False):
+def predict(net, testdata, num_classes, size:int, res:int, device, return_loss=False, return_conf=False, return_fc=False):
     """
     Calculates the accuracy and the loss of the model in testing mode.
     If return_loss is True, it will return the loss for each datapoint.
@@ -51,8 +51,10 @@ def predict(net, testdata, num_classes, size:int, res:int, device, return_loss=F
     truth = torch.zeros((len(dataset), size))
     if return_loss:
         losses = torch.zeros((len(dataset), size))
-    if return_values:
-        values = torch.zeros((len(dataset), size, num_classes))
+    if return_conf:
+        confidences = torch.zeros((len(dataset), size, num_classes))
+    if return_fc:
+        embeddings = torch.zeros((len(dataset), size, num_classes))
     i = 0
     net.eval()
     with torch.no_grad():
@@ -60,25 +62,36 @@ def predict(net, testdata, num_classes, size:int, res:int, device, return_loss=F
             X, y = data
             X = torch.swapaxes(X, -3, -1)
             outputs = net(X.view(-1, 3, X.shape[-2], X.shape[-1]).to(device))
-            if return_values:
-                values[i] = torch.softmax(outputs,dim=-1)
+            if return_fc: 
+                embeddings[i] = outputs
+            if return_conf:
+                confidences[i] = torch.softmax(outputs,dim=-1)
             if return_loss:
                 losses[i] = F.cross_entropy(outputs, torch.argmax(y,dim=-1).to(device)) 
             prediction[i] = torch.argmax(outputs, dim=-1)
             truth[i] = torch.argmax(y, dim=-1)
             i = i+1
 
-    if return_loss and not return_values:
-        return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses)
-    elif return_values and not return_loss:
-        return torch.flatten(truth), torch.flatten(prediction), values.view(len(testdata), num_classes)
-    elif return_loss and return_values:
-        return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses), values.view(len(testdata), num_classes)
+    if return_loss:
+        if return_conf:
+            if return_fc:
+                return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses), confidences.view(len(testdata), num_classes), embeddings.view(len(testdata), num_classes)
+            else:
+                return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses), confidences.view(len(testdata), num_classes)
+        else:
+            return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses)
+    elif return_conf:
+        if return_fc:
+            return torch.flatten(truth), torch.flatten(prediction), confidences.view(len(testdata), num_classes), embeddings.view(len(testdata), num_classes)
+        else:
+            return torch.flatten(truth), torch.flatten(prediction), confidences.view(len(testdata), num_classes) 
+    elif return_fc:
+        return torch.flatten(truth), torch.flatten(prediction), embeddings.view(len(testdata), num_classes)
     else:
         return torch.flatten(truth), torch.flatten(prediction)
 
 
-def shuffle_predict(net, testdata, num_classes, size:int, res:int, device, return_loss=False, return_values=False):
+def shuffle_predict(net, testdata, num_classes, size:int, res:int, device, return_loss=False, return_conf=False):
     """
     Calculates the accuracy and the loss of the model in testing mode.
     If return_loss is True, it will return the loss for each datapoint.
@@ -89,7 +102,7 @@ def shuffle_predict(net, testdata, num_classes, size:int, res:int, device, retur
     prediction = torch.zeros((len(dataset), size))
     truth = torch.zeros((len(dataset), size))
     losses = torch.zeros((len(dataset), size))
-    values = torch.zeros((len(dataset), size, num_classes))
+    confidences = torch.zeros((len(dataset), size, num_classes))
     i = 0
     net.eval()
     with torch.no_grad():
@@ -97,18 +110,18 @@ def shuffle_predict(net, testdata, num_classes, size:int, res:int, device, retur
             X, y = data
             X = torch.swapaxes(X, -3, -1)
             outputs = net(X.view(-1, 3, X.shape[-2], X.shape[-1]).to(device))
-            values[i] = torch.softmax(outputs,dim=-1)
+            confidences[i] = torch.softmax(outputs,dim=-1)
             losses[i] = F.cross_entropy(outputs, torch.argmax(y,dim=-1).to(device)) 
             prediction[i] = torch.argmax(outputs, dim=-1)
             truth[i] = torch.argmax(y,dim=-1)
             i = i+1
 
-    if return_loss and not return_values:
+    if return_loss and not return_conf:
         return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses)
-    elif return_values and not return_loss:
-        return torch.flatten(truth), torch.flatten(prediction), values.view(len(testdata), num_classes)
-    elif return_loss and return_values:
-        return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses), values.view(len(testdata), num_classes)
+    elif return_conf and not return_loss:
+        return torch.flatten(truth), torch.flatten(prediction), confidences.view(len(testdata), num_classes)
+    elif return_loss and return_conf:
+        return torch.flatten(truth), torch.flatten(prediction), torch.flatten(losses), confidences.view(len(testdata), num_classes)
     else:
         return torch.flatten(truth), torch.flatten(prediction)
 

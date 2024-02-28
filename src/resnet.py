@@ -90,6 +90,7 @@ class ResNet(nn.Module):
         x = self.layer4(x)
 
         x = self.avgpool(x)
+        #optional return
         x = x.reshape(x.shape[0], -1)
         x = self.fc(x)
         return x
@@ -124,4 +125,3 @@ def ResNet101(img_channels=3, num_classes=1000):
 
 def ResNet152(img_channels=3, num_classes=1000):
     return ResNet(152, Block, img_channels, num_classes)
-
