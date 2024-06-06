@@ -37,15 +37,18 @@ SAVE_PATH = args.savepath
 #variables controlled by the user. Change these to fit your specific needs.
 TRAIN_N_EVENTS = 10000 #Number of events to process for each class. If higher than the available number of events an exception will be raised.
 VAL_N_EVENTS = 3000
-TEST_N_EVENTS = 15000 #Number of events to process for each class. If higher than the available number of events an exception will be raised.
+TEST_N_EVENTS = 3000 #Number of events to process for each class. If higher than the available number of events an exception will be raised.
 RES = 50 #resolution
 
 #Data specification
-LABELS = ["PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL", "BH_n4_M8", "BH_n2_M10", "BH_n4_M10", "BH_n6_M10", "BH_n4_M12"]
+#LABELS = ["PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL", "BH_n4_M8", "BH_n2_M10", "BH_n4_M10", "BH_n6_M10", "BH_n4_M12"]
+LABELS = ["PP13-Sphaleron-THR9-FRZ15-NB0-NSUBPALL", "BH_n4_M8", "BH_n4_M10", "BH_n4_M12"]
 TEST_LABELS = [f"{label}_test" for label in LABELS]
-PLOT_LABELS = ["SPH_9", "BH_n4_M8", "BH_n2_M10", "BH_n4_M10", "BH_n6_M10", "BH_n4_M12"]
+#PLOT_LABELS = ["SPH_9", "BH_n4_M8", "BH_n2_M10", "BH_n4_M10", "BH_n6_M10", "BH_n4_M12"]
+PLOT_LABELS = ["SPH_9", "BH_n4_M8", "BH_n4_M10", "BH_n4_M12"]
 CLASSES = len(LABELS) #The number of output nodes in the net, equal to the number of classes
-FOLDERS = ["sph", "BH", "BH", "BH", "BH", "BH"]
+#FOLDERS = ["sph", "BH", "BH", "BH", "BH", "BH"]
+FOLDERS = ["sph", "BH", "BH", "BH"]
 CUT=True
 #Set data paths
 if CUT:
@@ -82,7 +85,7 @@ logging.info(f"Number of experiments to run: {N_EXPERIMENTS}")
 logging.info(EXPERIMENT_NAME)
 
 #filters
-filters=["divide"]
+filters=[None]
 MAX_VALUE = 200
 
 #transforms
@@ -151,7 +154,7 @@ def experiment(df, valdata, testdata, n_train, n, epochs, lr, transforms, filter
     return new_df, training_results, resnet
 
 results, training_results, resnet = experiment(df=results, valdata=val_data, testdata=test_data, n_train=TRAIN_N_EVENTS,
-                                                n=N_EXPERIMENTS, epochs=30, lr=0.001, transforms=transforms, filters=filters)
+                                                n=N_EXPERIMENTS, epochs=40, lr=0.001, transforms=transforms, filters=filters)
 
 results_string = results.to_string()
 logging.info(results_string)
