@@ -972,3 +972,78 @@ INFO:root:Padding towers to size: 613
 INFO:root:Padding tracks to size: 421
 INFO:root:Image data shape: (15000, 50, 50, 3)
 INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n4_M8_test_res50_STmin7_Nmin5_15000_events.h5
+INFO:root://2024-06-24 21:07:47.466448//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n2_M12_40000events.root
+INFO:root:Number of events loaded: 10000
+INFO:root:Applying ST min cut: 7.0 and N min cut: 5
+INFO:root:Number of events after cut: 7761
+ERROR:root:Number of events after cut does not match number of events specified by user.
+INFO:root://2024-06-24 21:08:14.425546//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n3_M12_40000events.root
+INFO:root:Number of events loaded: 10000
+INFO:root:Applying ST min cut: 7.0 and N min cut: 5
+INFO:root:Number of events after cut: 7001
+ERROR:root:Number of events after cut does not match number of events specified by user.
+INFO:root://2024-06-24 21:13:21.253988//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n3_M12_40000events.root
+INFO:root:Number of events loaded: 10000
+INFO:root:Applying ST min cut: 7.0 and N min cut: 5
+INFO:root:Number of events after cut: 7001
+ERROR:root:Number of events after cut does not match number of events specified by user.
+INFO:root://2024-06-24 21:53:48.943433//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n3_M12_40000events.root
+INFO:root:Number of events loaded: 10000
+INFO:root:Applying ST min cut: 7.0 and N min cut: 5
+INFO:root:Number of events after cut: 7001
+ERROR:root:Number of events after cut does not match number of events specified by user.
+INFO:root://2024-06-24 21:54:49.786118//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n5_M12_40000events.root
+INFO:root:Number of events loaded: 10000
+INFO:root:Applying ST min cut: 7.0 and N min cut: 5
+INFO:root:Number of events after cut: 6071
+ERROR:root:Number of events after cut does not match number of events specified by user.
+INFO:root://2024-06-24 22:11:23.789252//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n2_M12_40000events.root
+INFO:root:Number of events loaded: 40000
+INFO:root:Applying ST min cut: 7.0 and N min cut: 5
+INFO:root:Number of events after cut: 31060
+INFO:root:Padding towers to size: 565
+INFO:root:Padding tracks to size: 464
+INFO:root:Image data shape: (20000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n2_M12_res50_STmin7_Nmin5_20000_events.h5
+INFO:root://2024-06-24 22:13:15.626690//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n3_M12_40000events.root
+INFO:root:Number of events loaded: 40000
+INFO:root:Applying ST min cut: 7.0 and N min cut: 5
+INFO:root:Number of events after cut: 27891
+INFO:root:Padding towers to size: 539
+INFO:root:Padding tracks to size: 489
+INFO:root:Image data shape: (20000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n3_M12_res50_STmin7_Nmin5_20000_events.h5
+INFO:root://2024-06-24 22:14:36.297584//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n4_M12_40000events.root
+INFO:root:Number of events loaded: 40000
+INFO:root:Applying ST min cut: 7.0 and N min cut: 5
+INFO:root:Number of events after cut: 25918
+INFO:root:Padding towers to size: 537
+INFO:root:Padding tracks to size: 463
+INFO:root:Image data shape: (20000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n4_M12_res50_STmin7_Nmin5_20000_events.h5
+INFO:root://2024-06-24 22:15:42.276864//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n5_M12_40000events.root
+INFO:root:Number of events loaded: 40000
+INFO:root:Applying ST min cut: 7.0 and N min cut: 5
+INFO:root:Number of events after cut: 24084
+INFO:root:Padding towers to size: 567
+INFO:root:Padding tracks to size: 457
+INFO:root:Image data shape: (20000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n5_M12_res50_STmin7_Nmin5_20000_events.h5
+INFO:root://2024-06-24 22:16:47.892353//
+INFO:root:Reading file /disk/atlas3/data_MC/delphes/BH_n6_M12_40000events.root
+INFO:root:Number of events loaded: 40000
+INFO:root:Applying ST min cut: 7.0 and N min cut: 5
+INFO:root:Number of events after cut: 22747
+INFO:root:Padding towers to size: 515
+INFO:root:Padding tracks to size: 447
+INFO:root:Image data shape: (20000, 50, 50, 3)
+INFO:root:File saved as: /disk/atlas3/data_MC/2dhistograms/BH/50/BH_n6_M12_res50_STmin7_Nmin5_20000_events.h5

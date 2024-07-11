@@ -465,7 +465,7 @@ def load_hd5_histogram(path:Path, n_events:int, filters:list=None):
         return Tensor(arr)
 
 
-def load_datasets(input_files:list, device, n_events:int, filters:list=None, max_value:int=5000, transforms=None):
+def load_datasets(input_files:list, device, n_events:int, filters:list=None, max_value:int=5000, transforms=None, start_index:int=0):
     """ 
     Dataset must be in hdf5 format:
     Event1 /group
@@ -475,11 +475,11 @@ def load_datasets(input_files:list, device, n_events:int, filters:list=None, max
         Data  /dataset
         Label  /dataset
     """
-    def load_hd5_histogram(path:Path, n_events:int, filters=None):
+    def load_hd5_histogram(path:Path, n_events:int, filters:list, start_index:int):
         with h5py.File(path, 'r') as f:
             keys = list(f.keys())
-            if len(keys) >= n_events:
-                keys = keys[0:n_events]
+            if len(keys) >= (start_index + n_events):
+                keys = keys[start_index: start_index + n_events]
             else:
                 print("Not enough events!")
                 sys.exit()
@@ -502,7 +502,7 @@ def load_datasets(input_files:list, device, n_events:int, filters:list=None, max
         return a
     print(f"Loads data with transforms {transforms} and filters {filters}")
     #Loads the data files
-    data = [load_hd5_histogram(file, n_events, filters) for file in input_files]
+    data = [load_hd5_histogram(file, n_events, filters, start_index) for file in input_files]
     Cal = torch.cat([item[0:n_events] for item in data]).float().to(device)
     labels = label_maker(len(data), n_events).float().to(device)
     

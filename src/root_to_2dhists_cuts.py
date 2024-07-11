@@ -1,6 +1,5 @@
 import numpy as np
 import awkward as ak
-from fast_histogram import histogram2d
 import argparse
 import logging
 from datetime import datetime
