@@ -284,6 +284,9 @@ def apply_filters(key_list:list, image, maxvalue:float):
             elif key=="normalise":
                 image[image>maxvalue] = maxvalue
                 image = (image/maxvalue)
+            
+            elif key=="log":
+                image = np.log(image)
 
             elif key=="divide":
                 image = (image/maxvalue)
@@ -337,7 +340,7 @@ def view_data(data:torch.Tensor, cols:int, num_classes:int, labels:list, res:int
     Displays the calorimeter images.
     """
     def matrix_image_plot(ax, label):
-        ax.set_ylabel(r"$\phi$ [radians]]", fontsize=12)
+        ax.set_ylabel(r"$\phi$ [radians]", fontsize=12)
         ax.set_xlabel(r"$\eta$", fontsize=12)
         ax.set_title(label, fontsize=14,weight="bold")
         ax.tick_params(which="both", direction="inout", top=True, right=True, labelsize=12, pad=5, length=4, width=2)

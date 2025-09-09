@@ -50,3 +50,15 @@ The detector is simulated using the fast simulaton tool [Delphes](https://cp3.ir
 Cuts are made to suppress standard model background. The cuts are based on [this paper:](https://arxiv.org/abs/1805.06013).
 We make the cut slightly more restrictive by requiring a signal object to be defined as a jet or lepton with p_T > 70 GeV and eta < 2.4. Each event is required to have 5 or more signal objects and the sum of transverse energy from all signal objects plus the missing transverse energy (ST) must be greater than or equal to 7 TeV.
 The cuts are performed after detector simulation.
+
+## Number of events generated
+The number of events generated to get 10000/3000/150000 events after cut.
+Label:train/validation/test - efficiency
+
+BH_n2_M10:24000/6000/29000 - 0.55
+BH_n4_M8:60000/15000/100000 - 0.17
+BH_n4_M10:25000/15000/32000 - 0.49
+BH_n4_M12:20000/15000/25000 - 0.65
+BH_n6_M10:26000/7000/36000 - 0.43
+SPH_9:60000/20000/85000 - 0.18
+
