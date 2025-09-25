@@ -16,3 +16,4 @@ tqdm==4.66.1
 uproot==4.3.7
 xgboost==1.6.2
 matplotlib==3.6.2
+graphviz==0.21

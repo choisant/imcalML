@@ -40,7 +40,7 @@ VAL_N_EVENTS = 3000
 
 #ML constants
 EPOCHS = 100 
-PATIENCE = 10
+PATIENCE = 5
 filters=[None]
 MAX_VALUE = 200
 
@@ -65,11 +65,12 @@ transforms = torch.nn.Sequential(
 ### Hyperparameters to vary
 
 HYPERPARAM_DICT = {
-    "res" : [100, 200], 
-    "resnet_model" : ["ResNet18", "Resnet34"],
-    "lr" : [0.001, 0.01, 0.1],
-    "weight_decay" : [0],
-    "batchsize" : [2**8, 2**9, 2**10],
+    "res" : [50], 
+    "resnet_model" : ["ResNet18"],
+    "lr" : [0.0001, 0.001],
+    "cycle_T" : [5, 50, 500],
+    "weight_decay" : [0, 0.1],
+    "batchsize" : [2**8],
     "model_n" : [i for i in range(N_EXPERIMENTS)]
 }
 
@@ -101,8 +102,6 @@ for label in PLOT_LABELS:
 gridsearch_df["Epochs"] = np.zeros(len(gridsearch_df))
 gridsearch_df["Training time"] = ["time"]*len(gridsearch_df)
 gridsearch_df["Time"] = np.zeros(len(gridsearch_df))
-gridsearch_df = gridsearch_df.iloc[12:] ### Had to rerun
-gridsearch_df.reset_index(inplace = True, drop = True)
 gridsearch_df.to_csv(f"{SAVE_PATH}")
 
 ### Load data only if needed.
@@ -124,6 +123,7 @@ for i in range(len(gridsearch_df)):
     base_lr = gridsearch_df["lr"][i]
     batchsize = gridsearch_df["batchsize"][i]
     weight_decay = gridsearch_df["weight_decay"][i]
+    step_size = gridsearch_df["cycle_T"][i]
 
     ### Load data only if needed.
     if RES != RES_VAR:
@@ -160,7 +160,7 @@ for i in range(len(gridsearch_df)):
     resnet.to(DEVICE)
     optimizer = optim.Adam(resnet.parameters(), lr=base_lr, weight_decay=weight_decay)
     scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=base_lr, max_lr=base_lr*10, 
-                                                  step_size_up=5, mode="exp_range", gamma=0.85, cycle_momentum=False)
+                                                  step_size_up=step_size, mode="exp_range", gamma=0.85, cycle_momentum=False)
     start_train = timer()
     # Train model
     training_results = train_classifier(resnet, train_data, val_data, int(batchsize), EPOCHS, DEVICE, optimizer, scheduler, early_stopping=PATIENCE)
@@ -180,8 +180,9 @@ for i in range(len(gridsearch_df)):
     df_results["Correct"] = correct_list
 
     gridsearch_df.loc[i, "ACC"] = accuracy_score(df_results["Truth"], df_results["Prediction"], normalize=True)
-    gridsearch_df.loc[i, "LogLoss"] = log_loss(df_results["Truth"], df_results[[f"{j}" for j in range(len(LABELS))]], normalize=True)
-    cf_matrix = confusion_matrix(df_results["Truth"], df_results["Prediction"], normalize="true")
+    gridsearch_df.loc[i, "LogLoss"] = log_loss(df_results["Truth"], df_results[[f"{j}" for j in range(len(LABELS))]],
+                                               labels=[j for j in range(len(LABELS))], normalize=True)
+    cf_matrix = confusion_matrix(df_results["Truth"], df_results["Prediction"], normalize="true", labels=[j for j in range(len(LABELS))])
     for j in range(len(PLOT_LABELS)):
         gridsearch_df.loc[i, f"ACC_{PLOT_LABELS[j]}"] = cf_matrix[j,j]
     gridsearch_df.loc[i, "Epochs"] = training_results["Epoch"].values[-1] + 1

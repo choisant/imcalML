@@ -4,3 +4,4 @@ root_to_2dhists*.log
 *workspace
 *.model
 glest/
+*.pt

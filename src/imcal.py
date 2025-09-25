@@ -282,8 +282,9 @@ def apply_filters(key_list:list, image, maxvalue:float):
             
             #normalisation should probably always be last applied filter
             elif key=="normalise":
-                image[image>maxvalue] = maxvalue
-                image = (image/maxvalue)
+                #image[image>maxvalue] = maxvalue
+                maxvalue_image = image.max()
+                image = (image/maxvalue_image)
             
             elif key=="log":
                 image = np.log(image)
@@ -468,7 +469,7 @@ def load_hd5_histogram(path:Path, n_events:int, filters:list=None):
         return Tensor(arr)
 
 
-def load_datasets(input_files:list, device, n_events:int, filters:list=None, max_value:int=5000, transforms=None, start_index:int=0):
+def load_datasets(input_files:list, device, n_events:int, filters:list=None, transforms=None, max_value:int=5000, start_index:int=0):
     """ 
     Dataset must be in hdf5 format:
     Event1 /group

@@ -48,7 +48,8 @@ def fwd_pass_classifier(net, X:Tensor, y:Tensor, device, optimizer, scheduler, t
     return acc, loss
 
 def train_classifier(net, traindata, testdata, batchsize:int, epochs:int, device, optimizer, scheduler, 
-                     early_stopping:int=-1, biased_class:int=-1, bias_weight:float=0.1, mcd:bool=False):
+                     early_stopping:int=-1, val_batchsize:int=-1, biased_class:int=-1, bias_weight:float=0.1, 
+                     mcd:bool=False):
     """
     Trains the model for the number of epochs specified, using the batch size specified.
     Returns a dataframe with the stats from the training.
@@ -59,6 +60,10 @@ def train_classifier(net, traindata, testdata, batchsize:int, epochs:int, device
     i = 0
     patience = early_stopping #How many epochs to keep training if no improvement in validation loss
     min_loss = None
+    # Check loss around 10 times each epoch
+    val_loss_int = int(len(dataset)/10)
+    if val_batchsize==-1:
+        val_batchsize = batchsize
     for epoch in range(epochs):
         # Iterate over batches
         for data in dataset:
@@ -68,10 +73,11 @@ def train_classifier(net, traindata, testdata, batchsize:int, epochs:int, device
             acc, loss = fwd_pass_classifier(net, X, y, device, optimizer, scheduler, train=True, 
                                             biased_class=biased_class, bias_weight=bias_weight)
             #acc, loss = test(net, testdata, size=size)
-            if i % 10 == 0: #Record every ten batches
-                val_acc, val_loss = test_classifier(net, testdata, device, optimizer, scheduler, batchsize, 
+            if i%val_loss_int==0:
+                # Calculate validation loss every epoch
+                val_acc, val_loss = test_classifier(net, testdata, device, optimizer, scheduler, val_batchsize, 
                                                     biased_class=biased_class, bias_weight=bias_weight, mcd=mcd)
-                df_data = [float(loss), acc, float(val_loss), val_acc, epoch, i]
+                df_data = [float(loss), float(acc), float(val_loss), float(val_acc), epoch, i]
                 if df_created == False:
                     df = pd.DataFrame(dict(zip(df_labels, df_data)), index=[0])
                     df_created = True
@@ -97,15 +103,22 @@ def train_classifier(net, traindata, testdata, batchsize:int, epochs:int, device
 def test_classifier(net, data, device, optimizer, scheduler, size:int = 32, biased_class:int=-1, 
                     bias_weight:float=0.1, mcd:bool=False):
     """
-    Calculates the accuracy and the loss of the model for a random batch.
+    Calculates the average accuracy and the loss of the model for the validation set, averaging over batches.
     """
     net.eval()
     if mcd:
         enable_dropout(net)
     dataset = DataLoader(data, size, shuffle=True) #shuffle data and choose batch size
-    X, y = next(iter(dataset)) #get a random batch
-    val_acc, val_loss = fwd_pass_classifier(net, X, y, device, optimizer, scheduler, train=False, 
+    loss_list = torch.zeros(len(dataset))
+    acc_list = torch.zeros(len(dataset))
+    #X, y = next(iter(dataset)) #get a random batch
+    with torch.no_grad():
+        for i, data in enumerate(dataset):
+            X, y = data
+            acc_list[i], loss_list[i]  = fwd_pass_classifier(net, X, y, device, optimizer, scheduler, train=False, 
                                             biased_class=biased_class, bias_weight=bias_weight)
+    val_acc = acc_list.mean()
+    val_loss = loss_list.mean()
     return val_acc, val_loss
     
 def predict_classifier(net, testdata, num_classes:int, size:int, device):
