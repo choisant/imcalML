@@ -74,7 +74,6 @@ def train_classifier(net, traindata, testdata, batchsize:int, epochs:int, device
                                             biased_class=biased_class, bias_weight=bias_weight)
             #acc, loss = test(net, testdata, size=size)
             if i%val_loss_int==0:
-                # Calculate validation loss every epoch
                 val_acc, val_loss = test_classifier(net, testdata, device, optimizer, scheduler, val_batchsize, 
                                                     biased_class=biased_class, bias_weight=bias_weight, mcd=mcd)
                 df_data = [float(loss), float(acc), float(val_loss), float(val_acc), epoch, i]
